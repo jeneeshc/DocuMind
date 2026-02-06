@@ -1,4 +1,4 @@
-# DocuMind: Broken the Document Intelligence Trilemma
+# DocuMind: Breaking the Document Intelligence Trilemma
 
 **A Generalizable Hybrid AI Framework for Multi-Model Document Processing**
 
