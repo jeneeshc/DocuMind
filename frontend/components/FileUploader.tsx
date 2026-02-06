@@ -68,15 +68,15 @@ export function FileUploader({ onFileSelect, accept }: FileUploaderProps) {
             {!selectedFile ? (
                 <div
                     className={`h-40 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors
-            ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50 hover:bg-gray-100"}`}
+            ${dragActive ? "border-white bg-white/5" : "border-gray-600 bg-gray-800/50 hover:bg-gray-800"}`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     onClick={onButtonClick}
                 >
-                    <UploadCloud className={`w-10 h-10 mb-2 ${dragActive ? "text-blue-500" : "text-gray-400"}`} />
-                    <p className="text-sm font-medium text-gray-700">
+                    <UploadCloud className={`w-10 h-10 mb-2 ${dragActive ? "text-white" : "text-gray-400"}`} />
+                    <p className="text-sm font-medium text-gray-300">
                         Click to upload or drag and drop
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
@@ -84,24 +84,25 @@ export function FileUploader({ onFileSelect, accept }: FileUploaderProps) {
                     </p>
                 </div>
             ) : (
-                <div className="flex items-center justify-between p-4 bg-white border rounded-xl shadow-sm">
+                <div className="flex items-center justify-between p-4 bg-gray-800 border-gray-700 border rounded-xl shadow-sm">
                     <div className="flex items-center">
-                        <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                            <File className="w-5 h-5 text-blue-600" />
+                        <div className="p-2 bg-white/10 rounded-lg mr-3">
+                            <File className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                            <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(2)} KB</p>
+                            <p className="text-sm font-medium text-white">{selectedFile.name}</p>
+                            <p className="text-xs text-gray-400">{(selectedFile.size / 1024).toFixed(2)} KB</p>
                         </div>
                     </div>
                     <button
                         onClick={removeFile}
-                        className="p-1 hover:bg-gray-100 rounded-full transition"
+                        className="p-1 hover:bg-gray-700 rounded-full transition"
                     >
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     )
 }

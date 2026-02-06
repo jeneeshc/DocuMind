@@ -2,7 +2,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50;
+    @apply bg-[#0B1121] text-white;
   }
 }
 

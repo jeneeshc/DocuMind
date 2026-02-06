@@ -27,25 +27,25 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
             label: "Dashboard",
             icon: LayoutDashboard,
             href: "/",
-            color: "text-sky-500",
+            color: "text-slate-300",
         },
         {
             label: "Digital Data Transformation",
             icon: Database,
             href: "/stream-a",
-            color: "text-violet-500",
+            color: "text-gray-300",
         },
         {
             label: "Structured Document Intelligence",
             icon: ScanLine,
             href: "/stream-b",
-            color: "text-pink-700",
+            color: "text-zinc-300",
         },
         {
             label: "Semantic Text Analysis",
             icon: BrainCircuit,
             href: "/stream-c",
-            color: "text-orange-700",
+            color: "text-slate-300",
         },
         {
             label: "Settings",
@@ -66,10 +66,10 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
                 <div className={cn("flex items-center mb-14", isCollapsed ? "justify-center flex-col gap-y-4" : "pl-3 justify-between")}>
                     <Link href="/" className="flex items-center">
                         <div className="relative w-8 h-8 mr-4">
-                            <BrainCircuit className="w-8 h-8 text-cyan-400" />
+                            <BrainCircuit className="w-8 h-8 text-white" />
                         </div>
                         {!isCollapsed && (
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 text-transparent bg-clip-text whitespace-nowrap">
+                            <h1 className="text-2xl font-bold text-white whitespace-nowrap">
                                 DocuMind
                             </h1>
                         )}

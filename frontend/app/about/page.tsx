@@ -7,23 +7,23 @@ export default function AboutPage() {
     return (
         <div className="p-8 space-y-8 max-w-7xl mx-auto pb-20">
             <div className="space-y-4">
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-4xl font-bold tracking-tight text-white">
                     Breaking the Document Intelligence Trilemma
                 </h1>
-                <p className="text-xl text-gray-500 max-w-3xl">
+                <p className="text-xl text-gray-400 max-w-3xl">
                     A Generalizable Hybrid AI Framework for Multi-Model Document Processing
                 </p>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2">
-                <Card className="bg-gradient-to-br from-red-50 to-white border-red-100">
+                <Card className="bg-gradient-to-br from-gray-900 to-transparent border-gray-800 text-white">
                     <CardHeader>
-                        <CardTitle className="flex items-center text-red-700">
+                        <CardTitle className="flex items-center text-gray-400">
                             <AlertTriangle className="w-5 h-5 mr-2" />
                             The Problem: The "Last Mile" Gap
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="text-gray-700 leading-relaxed">
+                    <CardContent className="text-gray-300 leading-relaxed">
                         <p>
                             Despite powerful data analysis tools, organizations face a critical operational bottleneck.
                             High-value professionals (Tax Consultants, Legal Analysts) serve as human "middleware,"
@@ -36,20 +36,20 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-100">
+                <Card className="bg-gradient-to-br from-zinc-900 to-transparent border-zinc-800 text-white">
                     <CardHeader>
-                        <CardTitle className="flex items-center text-emerald-700">
+                        <CardTitle className="flex items-center text-white">
                             <Lightbulb className="w-5 h-5 mr-2" />
                             The Solution: Intelligent Orchestrator
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="text-gray-700 leading-relaxed">
+                    <CardContent className="text-gray-300 leading-relaxed">
                         <p>
                             We propose a <strong>Generalizable Hybrid AI Framework</strong> that functions as an orchestrator,
                             decoupling reasoning from execution. By using LLMs solely to configure and supervise
                             specialized, low-cost tools, we automate the "last mile" of data prep.
                         </p>
-                        <div className="mt-4 p-3 bg-white/60 rounded-lg border border-emerald-100 text-sm">
+                        <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 text-sm">
                             <strong>Impact:</strong> Prototypes indicate a potential cost reduction of over 99%
                             for structured data tasks and a context window reduction of 90% for long-form contracts.
                         </div>
@@ -58,42 +58,42 @@ export default function AboutPage() {
             </div>
 
             <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Core Technologies</h2>
+                <h2 className="text-2xl font-bold text-white">Core Technologies</h2>
                 <div className="grid gap-6 md:grid-cols-3">
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow bg-gray-800/40 border-gray-700 text-white">
                         <CardHeader>
-                            <CardTitle className="flex items-center text-base text-violet-700">
+                            <CardTitle className="flex items-center text-base text-gray-200">
                                 <Database className="w-5 h-5 mr-2" />
                                 Digital Data Transformation
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-sm text-gray-600">
+                        <CardContent className="text-sm text-gray-400">
                             Transforms massive structured datasets (CSV/XLS) using LLM-generated logic (Python/JSONata).
                             Logic is synthesized once and executed locally, ensuring speed and data privacy.
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow bg-gray-800/40 border-gray-700 text-white">
                         <CardHeader>
-                            <CardTitle className="flex items-center text-base text-pink-700">
+                            <CardTitle className="flex items-center text-base text-gray-200">
                                 <ScanLine className="w-5 h-5 mr-2" />
                                 Structured Document Intelligence
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-sm text-gray-600">
+                        <CardContent className="text-sm text-gray-400">
                             "Self-Healing" forms that use LLMs to dynamically repair broken OCR templates.
                             If a layout shifts or noise interferes, the orchestrator recalibrates without human intervention.
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-md transition-shadow bg-gray-800/40 border-gray-700 text-white">
                         <CardHeader>
-                            <CardTitle className="flex items-center text-base text-orange-700">
+                            <CardTitle className="flex items-center text-base text-gray-200">
                                 <BrainCircuit className="w-5 h-5 mr-2" />
                                 Semantic Text Analysis
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-sm text-gray-600">
+                        <CardContent className="text-sm text-gray-400">
                             Uses "Semantic Pruning" (RAG-Light) to filter documents before analysis.
                             This focuses the LLM on only the most relevant pages of complex contracts, reducing hallucinations and costs.
                         </CardContent>
@@ -101,16 +101,16 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            <div className="flex justify-center mt-12 pt-8 border-t">
+            <div className="flex justify-center mt-12 pt-8 border-t border-gray-800">
                 <div className="text-center">
-                    <div className="inline-flex items-center justify-center p-3 bg-gray-100 rounded-full mb-4">
-                        <Users className="w-6 h-6 text-gray-600" />
+                    <div className="inline-flex items-center justify-center p-3 bg-gray-800 rounded-full mb-4">
+                        <Users className="w-6 h-6 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900">Product Ownership</h3>
-                    <p className="text-gray-500 mt-1">
+                    <h3 className="text-lg font-medium text-white">Product Ownership</h3>
+                    <p className="text-gray-400 mt-1">
                         Driven by <strong>Jeneesh Jose</strong>
                     </p>
-                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">Product Owner</p>
+                    <p className="text-xs text-gray-600 mt-1 uppercase tracking-wide">Product Owner</p>
                 </div>
             </div>
         </div>
