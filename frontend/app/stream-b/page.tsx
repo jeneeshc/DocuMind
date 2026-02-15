@@ -10,6 +10,13 @@ export default function StreamBPage() {
     const [file, setFile] = useState<File | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
+    const [uploaderKey, setUploaderKey] = useState(0)
+
+    const handleReset = () => {
+        setFile(null)
+        setResult(null)
+        setUploaderKey(prev => prev + 1)
+    }
 
     const handleProcess = async () => {
         if (!file) return
@@ -55,28 +62,37 @@ export default function StreamBPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">Select Form (PDF/Image)</label>
                                 <FileUploader
+                                    key={uploaderKey}
                                     onFileSelect={setFile}
                                     accept=".pdf, .jpg, .png, .jpeg"
                                 />
                             </div>
 
-                            <button
-                                onClick={handleProcess}
-                                disabled={!file || isLoading}
-                                className="w-full bg-slate-200 hover:bg-white text-slate-900 font-bold py-2 px-4 rounded-lg flex items-center justify-center transition disabled:opacity-50"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Analyzing Layout...
-                                    </>
-                                ) : (
-                                    <>
-                                        <ScanLine className="w-4 h-4 mr-2" />
-                                        Extract Data
-                                    </>
-                                )}
-                            </button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={handleReset}
+                                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition border border-gray-700"
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    onClick={handleProcess}
+                                    disabled={!file || isLoading}
+                                    className="w-full bg-slate-200 hover:bg-white text-slate-900 font-bold py-2 px-4 rounded-lg flex items-center justify-center transition disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Analyzing Layout...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ScanLine className="w-4 h-4 mr-2" />
+                                            Extract Data
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

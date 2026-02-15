@@ -10,7 +10,7 @@ class OpenAIClient:
         self.client = AsyncOpenAI(api_key=self.api_key)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    async def generate_completion(self, system_prompt: str, user_prompt: str, model: str = "gpt-4-turbo-preview"):
+    async def generate_completion(self, system_prompt: str, user_prompt: str, model: str = "gpt-4o-mini"):
         """
         Generates a completion from OpenAI with retry logic.
         """

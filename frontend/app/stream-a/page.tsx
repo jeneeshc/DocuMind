@@ -12,6 +12,16 @@ export default function StreamAPage() {
     const [instruction, setInstruction] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
+    const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+    const [uploaderKey, setUploaderKey] = useState(0)
+
+    const handleReset = () => {
+        setFile(null)
+        setInstruction("")
+        setResult(null)
+        setDownloadUrl(null)
+        setUploaderKey(prev => prev + 1)
+    }
 
     const handleProcess = async () => {
         if (!file || !instruction) return
@@ -26,9 +36,14 @@ export default function StreamAPage() {
                 headers: { "Content-Type": "multipart/form-data" }
             })
             setResult(response.data)
-        } catch (error) {
-            console.error(error)
-            setResult({ status: "error", message: "Failed to process request" })
+            if (response.data.data?.result_id) {
+                setDownloadUrl(`http://localhost:8000/api/v1/download/${response.data.data.result_id}`)
+            }
+        } catch (error: any) {
+            console.error("Upload Error:", error)
+            const errorMsg = error.response?.data?.detail || error.message || "Failed to process request"
+            setResult({ status: "error", message: `Connection Error: ${errorMsg}. Ensure backend is running at http://localhost:8000` })
+            setDownloadUrl(null)
         } finally {
             setIsLoading(false)
         }
@@ -58,6 +73,7 @@ export default function StreamAPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">1. Upload Dataset</label>
                                 <FileUploader
+                                    key={uploaderKey}
                                     onFileSelect={setFile}
                                     accept=".csv, .xlsx, application/vnd.ms-excel"
                                 />
@@ -73,23 +89,31 @@ export default function StreamAPage() {
                                 />
                             </div>
 
-                            <button
-                                onClick={handleProcess}
-                                disabled={!file || !instruction || isLoading}
-                                className="w-full bg-slate-200 hover:bg-white text-slate-900 font-bold py-2 px-4 rounded-lg flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Synthesizing Logic...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play className="w-4 h-4 mr-2" />
-                                        Generate & Execute
-                                    </>
-                                )}
-                            </button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={handleReset}
+                                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition border border-gray-700"
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    onClick={handleProcess}
+                                    disabled={!file || !instruction || isLoading}
+                                    className="w-full bg-slate-200 hover:bg-white text-slate-900 font-bold py-2 px-4 rounded-lg flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Synthesizing Logic...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Play className="w-4 h-4 mr-2" />
+                                            Generate & Execute
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -111,6 +135,18 @@ export default function StreamAPage() {
                                         <strong>Status:</strong> {result.status}
                                         <br />
                                         {result.message}
+                                        {downloadUrl && (
+                                            <div className="mt-4">
+                                                <a
+                                                    href={downloadUrl}
+                                                    download
+                                                    className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded transition"
+                                                >
+                                                    <Play className="w-3 h-3 mr-2 rotate-90" />
+                                                    Download Full Dataset (CSV)
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {result.data?.generated_code && (

@@ -1,11 +1,12 @@
-from backend.app.clients.azure_client import azure_client
-from backend.app.clients.openai_client import openai_client
+from app.models.schemas import ProcessRequest, ProcessResponse
+from app.clients.fal_client import fal_client_instance as fal_client
+from app.clients.azure_client import azure_client
 import json
 
 class StreamBProcessor:
     def __init__(self):
         self.azure = azure_client
-        self.openai = openai_client
+        self.openai = fal_client
 
     async def analyze_layout(self, file_content: bytes):
         """
@@ -39,65 +40,90 @@ class StreamBProcessor:
         extracted_data["Total"] = None 
         return extracted_data
 
-    async def self_heal(self, azure_result, missing_fields: list):
+    def referee_validate(self, data: dict):
         """
-        Uses OpenAI to find missing fields based on the layout content.
+        Layer 2: Validation Gate (Referee Agent)
+        Applies domain logic to validate extracted coordinates and values.
+        """
+        issues = []
+        # Example validation: Total must be a monetary value
+        total = data.get("Total")
+        if total is None:
+            issues.append("Total field is missing.")
+        elif not any(char.isdigit() for char in str(total)):
+            issues.append(f"Invalid Total format: {total}")
+            
+        return issues
+
+    async def self_heal(self, azure_result, issues: list):
+        """
+        Correction: Invokes Vision-LLM/LLM to 'heal' the coordinate map or extraction.
         """
         content = azure_result.content
         
         prompt = f"""
-        I have analyzed a document but failed to extract the following fields strictly: {missing_fields}.
+        The following issues were identified by the Referee Agent:
+        {issues}
         
-        Here is the full text content of the document (extracted via OCR):
+        Here is the document context:
         ---
-        {content[:10000]}  # Truncate to avoid context limit
+        {content[:14000]}
         ---
         
-        Please apply reasoning to identify the likely values for: {missing_fields}.
-        Return a JSON object with the corrected values.
+        Rules:
+        1. Correct the extraction and provide the valid values for the identified issues.
+        2. Return ONLY a valid JSON object.
+        3. Do NOT include any explanations or markdown formatting (like ```json).
+        4. Focus on precision. Use the provided context to find the exact values.
         """
         
         response = await self.openai.generate_completion(
-            system_prompt="You are a Document Intelligence Repair Agent.",
+            system_prompt="You are a Self-Healing Document Agent (Referee). Your output must be strictly a JSON object.",
             user_prompt=prompt
         )
         
-        return response
+        # Clean up response in case model still includes markdown
+        if "```json" in response:
+            response = response.split("```json")[1].split("```")[0].strip()
+        elif "```" in response:
+            response = response.split("```")[1].split("```")[0].strip()
+            
+        return response.strip()
 
     async def process(self, file_content: bytes, filename: str):
-        # 1. Analyze
+        # 1. Fast Path: Analyze
         result, error = await self.analyze_layout(file_content)
         if error:
-            # Fallback or strict error
-            # For prototype without keys, we might want to mock the success path
             if "Azure Client not configured" in error:
                 return {
                     "status": "simulated",
-                    "message": "Azure credentials missing. Simulating self-healing flow.",
+                    "message": "Azure credentials missing. Simulating self-healing loop.",
                     "extracted": {"Total": "$1,234.56 (Simulated)"},
-                    "healing_applied": True
+                    "healing_applied": True,
+                    "referee_report": ["Total was missing, healed via simulation."]
                 }
             return {"status": "error", "message": error}
 
         # 2. Extract
         data = self.extract_initial_values(result)
         
-        # 3. Validate
-        missing = [k for k, v in data.items() if v is None]
+        # 3. Validation Gate
+        issues = self.referee_validate(data)
         
         healing_report = None
-        if missing:
-            # 4. Self-Heal
-            healed_json = await self.self_heal(result, missing)
+        if issues:
+            # 4. Correction (Self-Heal)
+            healed_json = await self.self_heal(result, issues)
             try:
                 healed_data = json.loads(healed_json)
                 data.update(healed_data)
                 healing_report = {
-                    "healed_fields": missing,
-                    "logic": "LLM recovered values from context"
+                    "detected_issues": issues,
+                    "healed_fields": list(healed_data.keys()),
+                    "logic": "Referee Agent identified discrepancies and healed them via LLM reasoning."
                 }
             except:
-                healing_report = {"error": "Failed to parse healing response"}
+                healing_report = {"error": "Failed to parse referee healing response", "issues": issues}
 
         return {
             "status": "success",

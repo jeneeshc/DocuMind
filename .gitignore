@@ -2,45 +2,23 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
 venv/
-env/
-ENV/
 .env
-.venv
-env.bak/
-venv.bak/
 
-# Environment Variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-backend/.env
+# DataSources (Too large for Git)
+datasources/CUAD/
+datasources/FUNSD/
+datasources/FUTURA/
+datasources/NIST/
+datasources/fanny/
 
-# Node
-node_modules/
-npm-debug.log
-yarn-error.log
-.next/
-out/
+# Keep Test data for verification
+!datasources/Test/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

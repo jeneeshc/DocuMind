@@ -30,22 +30,28 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
             color: "text-slate-300",
         },
         {
-            label: "Digital Data Transformation",
+            label: "Stream A: Logic Synthesis",
             icon: Database,
             href: "/stream-a",
             color: "text-gray-300",
         },
         {
-            label: "Structured Document Intelligence",
+            label: "Stream B: Self-Healing",
             icon: ScanLine,
             href: "/stream-b",
             color: "text-zinc-300",
         },
         {
-            label: "Semantic Text Analysis",
+            label: "Stream C: Visual Extraction",
             icon: BrainCircuit,
             href: "/stream-c",
             color: "text-slate-300",
+        },
+        {
+            label: "Stream D: Semantic Pruning",
+            icon: Database,
+            href: "/stream-d",
+            color: "text-gray-300",
         },
         {
             label: "Settings",

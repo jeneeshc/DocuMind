@@ -12,13 +12,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-from backend.app.api import router as api_router
+from app.api import router as api_router
 app.include_router(api_router, prefix="/api/v1")
 
 # Configure CORS
 origins = [
     "http://localhost:3000",  # Next.js frontend
     "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
 ]
 
 app.add_middleware(
@@ -42,7 +44,7 @@ async def health_check():
     return {
         "status": "healthy",
         "services": {
-            "openai": "configured" if os.getenv("OPENAI_API_KEY") else "missing_key",
+            "fal": "configured" if os.getenv("FAL_KEY") else "missing_key",
             "azure": "configured" if os.getenv("AZURE_FORM_RECOGNIZER_KEY") else "missing_key"
         }
     }
