@@ -1,0 +1,3 @@
+ItemID,Category,StockLevel,ReorderPoint,Price,BelowReorderPoint
+ITEM-177,Electronics,42,48,450.6,True
+ITEM-179,Stationery,23,34,195.93,True

@@ -1,0 +1,7 @@
+ItemID,Category,StockLevel,ReorderPoint,Price,Below ReorderPoint
+ITEM-112,Stationery,9,41,305.49,True
+ITEM-119,Appliances,40,46,284.79,True
+ITEM-126,Appliances,37,39,170.74,True
+ITEM-140,Stationery,45,46,266.41,True
+ITEM-152,Electronics,4,14,205.69,True
+ITEM-175,Electronics,2,10,397.41,True

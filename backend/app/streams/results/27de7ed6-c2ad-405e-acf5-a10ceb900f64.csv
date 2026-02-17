@@ -1,0 +1,5 @@
+ItemID,Category,StockLevel,ReorderPoint,Price
+ITEM-116,Electronics,33,37,393.72
+ITEM-128,Accessories,5,32,227.57
+ITEM-132,Electronics,1,49,174.52
+ITEM-148,Appliances,7,41,480.76

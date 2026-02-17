@@ -1,0 +1,3 @@
+ItemID,Category,StockLevel,ReorderPoint,Price,BelowReorderPoint
+ITEM-112,Furniture,9,46,123.92,True
+ITEM-115,Stationery,14,50,184.88,True

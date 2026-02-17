@@ -11,6 +11,7 @@ export default function StreamBPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
     const [uploaderKey, setUploaderKey] = useState(0)
+    const [mode, setMode] = useState<"autonomous" | "direct">("direct")
 
     const handleReset = () => {
         setFile(null)
@@ -25,8 +26,12 @@ export default function StreamBPage() {
         const formData = new FormData()
         formData.append("file", file)
 
+        const endpoint = mode === "autonomous"
+            ? "http://localhost:8000/api/v1/process/orchestrate"
+            : "http://localhost:8000/api/v1/process/stream-b"
+
         try {
-            const response = await axios.post("http://localhost:8000/api/v1/process/stream-b", formData, {
+            const response = await axios.post(endpoint, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             })
             setResult(response.data)
@@ -56,9 +61,27 @@ export default function StreamBPage() {
                 <div className="space-y-6">
                     <Card className="bg-gray-800 border-gray-700 text-white">
                         <CardHeader>
-                            <CardTitle>Document Upload</CardTitle>
+                            <CardTitle>Configuration</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Orchestration Mode</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => setMode("direct")}
+                                        className={`py-2 px-3 text-xs rounded-md border transition ${mode === "direct" ? "bg-zinc-700 border-zinc-500 text-white" : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"}`}
+                                    >
+                                        Direct (Standard)
+                                    </button>
+                                    <button
+                                        onClick={() => setMode("autonomous")}
+                                        className={`py-2 px-3 text-xs rounded-md border transition ${mode === "autonomous" ? "bg-blue-900/40 border-blue-500 text-white" : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"}`}
+                                    >
+                                        Autonomous (Gatekeeper)
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">Select Form (PDF/Image)</label>
                                 <FileUploader
@@ -83,12 +106,12 @@ export default function StreamBPage() {
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Analyzing Layout...
+                                            {mode === "autonomous" ? "Orchestrating..." : "Analyzing Layout..."}
                                         </>
                                     ) : (
                                         <>
                                             <ScanLine className="w-4 h-4 mr-2" />
-                                            Extract Data
+                                            {mode === "autonomous" ? "Run Orchestrator" : "Extract Data"}
                                         </>
                                     )}
                                 </button>

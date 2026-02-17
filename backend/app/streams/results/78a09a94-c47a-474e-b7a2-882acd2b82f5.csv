@@ -1,0 +1,3 @@
+ItemID,Category,StockLevel,ReorderPoint,Price,Needs Reorder
+ITEM-114,Appliances,37,41,460.42,True
+ITEM-132,Appliances,14,21,32.26,True

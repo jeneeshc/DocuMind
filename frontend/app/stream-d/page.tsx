@@ -12,6 +12,7 @@ export default function StreamDPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
     const [uploaderKey, setUploaderKey] = useState(0)
+    const [mode, setMode] = useState<"autonomous" | "direct">("direct")
 
     const handleReset = () => {
         setFile(null)
@@ -28,8 +29,12 @@ export default function StreamDPage() {
         formData.append("file", file)
         formData.append("query", query)
 
+        const endpoint = mode === "autonomous"
+            ? "http://localhost:8000/api/v1/process/orchestrate"
+            : "http://localhost:8000/api/v1/process/stream-d"
+
         try {
-            const response = await axios.post("http://localhost:8000/api/v1/process/stream-d", formData, {
+            const response = await axios.post(endpoint, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             })
             setResult(response.data)
@@ -62,6 +67,24 @@ export default function StreamDPage() {
                             <CardTitle>Semantic Query</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Orchestration Mode</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => setMode("direct")}
+                                        className={`py-2 px-3 text-xs rounded-md border transition ${mode === "direct" ? "bg-zinc-700 border-zinc-500 text-white" : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"}`}
+                                    >
+                                        Direct (Standard)
+                                    </button>
+                                    <button
+                                        onClick={() => setMode("autonomous")}
+                                        className={`py-2 px-3 text-xs rounded-md border transition ${mode === "autonomous" ? "bg-blue-900/40 border-blue-500 text-white" : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"}`}
+                                    >
+                                        Autonomous (Gatekeeper)
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-300">1. Upload Unstructured Document</label>
                                 <FileUploader
@@ -99,12 +122,12 @@ export default function StreamDPage() {
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Pruning Context...
+                                            {mode === "autonomous" ? "Orchestrating..." : "Pruning Context..."}
                                         </>
                                     ) : (
                                         <>
                                             <Play className="w-4 h-4 mr-2" />
-                                            Search Document
+                                            {mode === "autonomous" ? "Run Orchestrator" : "Search Document"}
                                         </>
                                     )}
                                 </button>

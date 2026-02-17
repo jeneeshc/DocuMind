@@ -13,7 +13,10 @@ app = FastAPI(
 )
 
 from app.api import router as api_router
+from app.routers.testing import router as testing_router
+
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(testing_router, prefix="/api/v1/testing")
 
 # Configure CORS
 origins = [

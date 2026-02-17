@@ -11,7 +11,8 @@ import {
     ScanLine,
     BrainCircuit,
     PanelLeft,
-    Info
+    Info,
+    Activity
 } from "lucide-react"
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
             href: "/",
             color: "text-slate-300",
         },
+
         {
             label: "Stream A: Logic Synthesis",
             icon: Database,
@@ -57,6 +59,12 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
             label: "Settings",
             icon: Settings,
             href: "/settings",
+        },
+        {
+            label: "Evaluation Suite",
+            icon: Activity,
+            href: "/testing",
+            color: "text-slate-300",
         },
         {
             label: "About",
