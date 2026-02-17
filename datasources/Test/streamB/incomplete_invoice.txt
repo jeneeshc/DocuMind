@@ -1,9 +1,0 @@
-INVOICE #9999
-Billed To: [Missing Name]
-
-Description:
-Widget A - $100
-Widget B - $200
-
-Total Due: $300
-Due Date: [Missing Date]

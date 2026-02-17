@@ -6,14 +6,8 @@ venv/
 .env
 
 # DataSources (Too large for Git)
-datasources/CUAD/
-datasources/FUNSD/
-datasources/FUTURA/
-datasources/NIST/
-datasources/fanny/
-
-# Keep Test data for verification
-!datasources/Test/
+# DataSources (Too large for Git)
+datasources/
 
 # Logs
 *.log
