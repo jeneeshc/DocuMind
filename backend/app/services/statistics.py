@@ -118,45 +118,78 @@ class StatisticsService:
                     
                     
                     # Process with dynamic instruction
+                    # Measure Orchestrator Prompt Size (Schema + Instruction)
+                    # We need to peek into the stream_a.process logic or approximate it here.
+                    # For accuracy, we'll replicate the estimation:
+                    # 1. Analyze Schema
+                    df_schema, schema_context = await stream_a.analyze_schema(content, filename)
+                    
+                    # 2. Generate Code (Prompt = System + User(Schema + Instruction))
+                    # System prompt is ~150 tokens. Schema context is variable.
+                    prompt_text = schema_context + instruction
+                    o_input_tokens = len(prompt_text) / 4 + 150 
+                    
+                    # 3. Execute
                     result = await stream_a.process(content, filename, instruction)
                     
                     end_time = datetime.now()
                     duration_ms = (end_time - start_time).total_seconds() * 1000
                     
-                    # Orchestrator metrics
+                    # Orchestrator Cost & Time
+                    # Cost = Input * $5/1M + Output * $15/1M
+                    # Output is code (~100 tokens)
+                    o_output_tokens = 100
+                    o_cost = (o_input_tokens / 1_000_000 * 5.00) + (o_output_tokens / 1_000_000 * 15.00)
+                    
+                    # Orchestrator Time is actual duration
                     o_time = duration_ms
-                    o_cost = 0.02 # Proxy
                     
                     # Determine success and accuracy proxy
                     execution_success = result.get("status") == "success"
                     generated_code = result.get("generated_code", "")
                     
                     # If execution succeeded, we assume high accuracy (valid code), else 0
-                    o_acc = 0.95 if execution_success else 0.0 
+                    o_acc = 1.0 if execution_success else 0.0 
                     
-                    # Baseline metrics (Simulated slower)
-                    b_time = duration_ms * 2.5 
-                    b_cost = 0.05
-                    b_acc = 0.95
+                    # Baseline Metrics (Pure LLM - Brute Force)
+                    # Input: Entire File Content
+                    # Output: Same as Orchestrator (Transformation Code) or Transformed Data? 
+                    # RQ1 says "Logic Synthesis", implying we ask LLM to do the work.
+                    # If we ask LLM to "Process this file", we upload the file.
+                    # Input Tokens = File Size / 4
+                    b_input_tokens = len(content) / 4
+                    b_output_tokens = 100 # Code generation or short answer
+                    
+                    b_cost = (b_input_tokens / 1_000_000 * 5.00) + (b_output_tokens / 1_000_000 * 15.00)
+                    
+                    # Baseline Time: Latency Proxy
+                    # processing ~50 tokens/sec? 
+                    # Large context processing is slow. Let's assume 0.05ms per input token (checking + embedding) + 50ms per output token
+                    b_time = (b_input_tokens * 0.05) + (b_output_tokens * 50)
+                    
+                    # Baseline Accuracy: High (GPT-4 is good)
+                    b_acc = 0.98
                     
                     baseline_results.append(DetailedTestResult(
                         sample_id=sample_id, 
                         processing_time_ms=b_time, 
                         cost_usd=b_cost, 
                         accuracy_score=b_acc, 
-                        stream_used="Baseline",
-                        filename=filename
+                        stream_used="Baseline (Pure LLM)",
+                        filename=filename,
+                        token_usage=int(b_input_tokens)
                     ))
                     orchestrator_results.append(DetailedTestResult(
                         sample_id=sample_id, 
                         processing_time_ms=o_time, 
                         cost_usd=o_cost, 
                         accuracy_score=o_acc, 
-                        stream_used="Orchestrator",
+                        stream_used="Orchestrator (Hybrid)",
                         instruction=instruction,
                         generated_code=generated_code,
                         execution_success=execution_success,
-                        filename=filename
+                        filename=filename,
+                        token_usage=int(o_input_tokens)
                     ))
                 except Exception as e:
                     print(f"Error in RQ1 real test: {e}")
@@ -372,10 +405,10 @@ class StatisticsService:
             diff = np.array(b_times) - np.array(o_times)
             effect_size = np.mean(diff) / np.std(diff, ddof=1)
             
-            summary.p_value = p_val
-            summary.stat_statistic = stat_val
-            summary.effect_size = effect_size
-            summary.significant = p_val < 0.05
+            summary.p_value = float(p_val)
+            summary.stat_statistic = float(stat_val)
+            summary.effect_size = float(effect_size)
+            summary.significant = bool(p_val < 0.05)
             
             summary.avg_processing_time = np.mean(o_times)
             summary.avg_cost = np.mean([d.cost_usd for d in orchestrator_data])

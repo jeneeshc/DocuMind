@@ -4,11 +4,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
-    LayoutDashboard,
-    FileText,
-    Settings,
-    Database,
-    ScanLine,
     BrainCircuit,
     PanelLeft,
     Info,
@@ -25,52 +20,22 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
 
     const routes = [
         {
-            label: "Dashboard",
-            icon: LayoutDashboard,
-            href: "/",
-            color: "text-slate-300",
-        },
-
-        {
-            label: "Stream A: Logic Synthesis",
-            icon: Database,
-            href: "/stream-a",
-            color: "text-gray-300",
-        },
-        {
-            label: "Stream B: Self-Healing",
-            icon: ScanLine,
-            href: "/stream-b",
-            color: "text-zinc-300",
-        },
-        {
-            label: "Stream C: Visual Extraction",
+            label: "Data Transformation",
             icon: BrainCircuit,
-            href: "/stream-c",
-            color: "text-slate-300",
-        },
-        {
-            label: "Stream D: Semantic Pruning",
-            icon: Database,
-            href: "/stream-d",
-            color: "text-gray-300",
-        },
-        {
-            label: "Settings",
-            icon: Settings,
-            href: "/settings",
+            href: "/",
+            color: "text-blue-400",
         },
         {
             label: "Evaluation Suite",
             icon: Activity,
             href: "/testing",
-            color: "text-slate-300",
+            color: "text-emerald-400",
         },
         {
             label: "About",
             icon: Info,
             href: "/about",
-            color: "text-gray-500",
+            color: "text-gray-400",
         },
     ]
 

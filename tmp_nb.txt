@@ -1,0 +1,32 @@
+# DocuMind: Enterprise-Grade Hybrid AI Document Orchestrator
+
+## Jeneesh Jose
+
+DocuMind is a next-generation document intelligence platform designed to handle complex, multi-format document workflows. It leverages a **Hybrid AI Framework** that combines deterministic logic, structured extraction with self-healing capabilities, visual understanding, and semantic reasoning to process everything from spreadsheets to unstructured legal contracts.
+
+## IRS Forms download for Stream B - Digital and native PDF forms
+
+## Fill the digital downloaded forms with random data to test the position based extraction logic
+
+## Normalization for Stream A (Structured Data)
+
+This code converts CSV, XLSX, XML, and JSON files into a Pandas DataFrame and a canonical JSON format.
+
+ - Scans the specified folder for .csv files.
+ - For each CSV, reads it into a Pandas DataFrame.
+ - Converts the DataFrame to a list of dictionaries (canonical JSON format).
+ - Writes that list to a .json file with the same base name in the same folder (or a separate output folder if you change output_dir).
+ - Prints progress and any errors.
+
+### RQ2 (Cost Optimization)
+ - Required Fields: document_id, stratum, cascade_cost, baseline_cost
+ - Readiness: We have the "Gatekeeper" routing logic.
+ - Gaps:
+ - We need a testing script that forces a document through both paths (Cascade vs. Direct Baseline) to log the comparative token costs.
+
+## Custom Degradation Pipeline for RQ2 Scanned strata
+### Key Advantages of This Approach
+ - Controlled variability: You can adjust skew angles, noise levels, and brightness to test different degradation levels 
+ - Known ground truth: Since you start with your filled digital forms, you know exactly what text should be extracted
+ - Reproducible: The random seeds can be fixed for reproducible experiments
+ - Realistic artifacts: The combination of skew, noise, and brightness variation simulates real scanning conditions 

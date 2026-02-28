@@ -73,13 +73,34 @@ class StreamAProcessor:
         """
         local_vars = {"df": df.copy(), "pd": pd}
         try:
+            # Capture stdout to see prints if any (optional, but good for debugging)
+            import sys
+            import io
+            old_stdout = sys.stdout
+            sys.stdout = buffer = io.StringIO()
+            
             exec(code, {}, local_vars)
+            
+            sys.stdout = old_stdout
             
             # Use result_df if available, otherwise fallback to modified df
             result_df = local_vars.get("result_df", local_vars.get("df"))
             
             if result_df is None:
-                return None, "The generated code did not produce a valid dataframe."
+                return None, "The generated code did not produce a valid result."
+            
+            # ENSURE result_df is a DataFrame
+            # If it's a Series (e.g. from groupby or simple aggregation)
+            if isinstance(result_df, pd.Series):
+                result_df = result_df.to_frame()
+                
+            # If it's a scalar (int, float, str, bool, numpy scalar)
+            elif not isinstance(result_df, pd.DataFrame):
+                # Check for numpy scalars
+                if hasattr(result_df, 'item'):
+                     result_df = result_df.item()
+                     
+                result_df = pd.DataFrame([{"Result": result_df}])
             
             return result_df, None
         except Exception as e:

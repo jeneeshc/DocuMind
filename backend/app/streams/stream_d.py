@@ -19,7 +19,7 @@ class StreamDProcessor:
         """
         Uses Azure to get Markdown content or falls back to text decoding for testing.
         """
-        if filename.lower().endswith(('.txt', '.md')):
+        if filename.lower().endswith(('.txt', '.md', '.csv')):
             try:
                 return file_content.decode('utf-8')
             except:

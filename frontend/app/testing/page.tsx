@@ -1,297 +1,376 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import axios from "axios"
-import { Activity, Play, CheckCircle, AlertTriangle, Download } from "lucide-react"
+import React, { useState, useEffect, useMemo } from "react"
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TestCharts } from "@/components/testing/TestCharts"
+import { Activity, Zap, CheckCircle, FileSearch, ShieldAlert, Cpu, Coins } from "lucide-react"
 
-export default function TestingStrategyPage() {
-    const [loading, setLoading] = useState(false)
-    const [sampleSize, setSampleSize] = useState(100)
-    const [history, setHistory] = useState<any[]>([])
-    const [latestResult, setLatestResult] = useState<any>(null)
+// Dynamically import Recharts to avoid Next.js SSR Hydration Mismatch
+const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false })
+const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
+const RechartsTooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false })
+const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false })
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false })
+const Scatter = dynamic(() => import('recharts').then(mod => mod.Scatter), { ssr: false })
+const ComposedChart = dynamic(() => import('recharts').then(mod => mod.ComposedChart), { ssr: false })
+
+function calculateMean(data: any[], groupField: string, valueField: string) {
+    const groups: Record<string, number[]> = {};
+    data.forEach(row => {
+        const g = row[groupField];
+        const v = row[valueField];
+        if (g != null && v != null) {
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(v);
+        }
+    });
+    return Object.keys(groups).map(g => {
+        const arr = groups[g];
+        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return { name: g, [valueField]: Number(mean.toFixed(4)) };
+    });
+}
+
+function computeF2Metrics(data: any[], predCol: string, trueCol: string) {
+    let tp = 0, fp = 0, fn = 0;
+    data.forEach(row => {
+        const p = row[predCol];
+        const t = row[trueCol];
+        if (p === 1 && t === 1) tp++;
+        if (p === 1 && t === 0) fp++;
+        if (p === 0 && t === 1) fn++;
+    });
+    const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+    const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+    const f2 = (precision + recall) === 0 ? 0 : (5 * precision * recall) / (4 * precision + recall);
+    return { Precision: Number(precision.toFixed(3)), Recall: Number(recall.toFixed(3)), F2: Number(f2.toFixed(3)) };
+}
+
+export default function EvaluationSuitePage() {
+    const [data, setData] = useState<{ rq1: any[], rq2: any[], rq3: any[], rq4: any[] }>({ rq1: [], rq2: [], rq3: [], rq4: [] })
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        fetchHistory()
+        setMounted(true)
     }, [])
 
-    const fetchHistory = async () => {
-        try {
-            const res = await axios.get("http://localhost:8000/api/v1/testing/history")
-            setHistory(res.data)
-        } catch (error) {
-            console.error("Failed to fetch history:", error)
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/results')
+                const json = await res.json()
+                setData(json)
+                setLoading(false)
+            } catch (e) {
+                console.error("Failed to fetch results", e)
+            }
         }
-    }
 
-    const runTest = async (testType: string) => {
-        setLoading(true)
-        try {
-            const res = await axios.post("http://localhost:8000/api/v1/testing/run", {
-                test_type: testType,
-                sample_size: Number(sampleSize),
-                mock: false // Run real tests if samples exist
-            })
-            setLatestResult(res.data)
-            fetchHistory()
-        } catch (error) {
-            console.error("Test failed:", error)
-        } finally {
-            setLoading(false)
-        }
-    }
+        // Initial fetch
+        fetchData()
 
-    const handleExport = (testId: string) => {
-        window.open(`http://localhost:8000/api/v1/testing/export/${testId}`, '_blank')
-    }
+        // Poll every 5 seconds for live updates
+        const interval = setInterval(fetchData, 5000)
+        return () => clearInterval(interval)
+    }, [])
 
-    const TEST_CONFIG = [
-        {
-            id: "RQ2",
-            title: "Routing Efficiency",
-            stream: "Document Classification",
-            description: "Measures reduction in Token Usage via orchestration. Tests if the median difference between systems is zero.",
-            method: "Wilcoxon Signed-Rank Test: W = Σ sign(x_i - y_i) * R_i"
-        },
-        {
-            id: "RQ1",
-            title: "Trilemma Analysis",
-            stream: "Stream A (Logic Synthesis)",
-            description: "Evaluates the trade-offs between Cost, Latency, and Accuracy. We compare the difference scores for each metric.",
-            method: "Paired t-Test: t = (x̄ - μ0) / (s / √n)"
-        },
-        {
-            id: "RQ3",
-            title: "Referee Validation",
-            stream: "Stream B (Self-Healing)",
-            description: "Assesses error detection capabilities. Focuses on discordance cases (where one model is right and the other wrong).",
-            method: "McNemar’s Test: χ² = (b - c)² / (b + c)"
-        },
-        {
-            id: "RQ5",
-            title: "Visual Extraction",
-            stream: "Stream C (Visual Extraction)",
-            description: "Evaluates accuracy of extracting structured data from charts and graphs compared to traditional OCR.",
-            method: "Independent t-Test: t = (x̄1 - x̄2) / sp * √(1/n1 + 1/n2)"
-        },
-        {
-            id: "RQ4",
-            title: "Domain Adaptation",
-            stream: "Stream A & D (Cross-Domain)",
-            description: "Tests transferability from Tax to Legal domains. Hypothesis supported if performance drop < 20%.",
-            method: "Confidence Interval: x̄ ± Z * (s / √n)"
-        }
-    ]
+    const { rq1, rq2, rq3, rq4 } = data
+
+    // --- RQ1 Processing ---
+    const rq1Stats = useMemo(() => {
+        if (rq1.length === 0) return { accuracy: [], cost: [], time: [] };
+        return {
+            accuracy: calculateMean(rq1, 'group', 'accuracy'),
+            cost: calculateMean(rq1, 'group', 'cost'),
+            time: calculateMean(rq1, 'group', 'time')
+        };
+    }, [rq1]);
+
+    // --- RQ2 Processing ---
+    const rq2CostComparison = useMemo(() => {
+        if (rq2.length === 0) return [];
+        const groups: Record<string, { baseline: number[], cascade: number[] }> = {};
+        rq2.forEach(d => {
+            const cat = d.category;
+            if (cat && d.baseline_cost != null && d.cascade_cost != null) {
+                if (!groups[cat]) groups[cat] = { baseline: [], cascade: [] };
+                groups[cat].baseline.push(d.baseline_cost);
+                groups[cat].cascade.push(d.cascade_cost);
+            }
+        });
+
+        return Object.keys(groups).map(cat => {
+            const b = groups[cat].baseline;
+            const c = groups[cat].cascade;
+            const avgB = b.reduce((a, v) => a + v, 0) / b.length;
+            const avgC = c.reduce((a, v) => a + v, 0) / c.length;
+
+            return {
+                category: cat.replace('_', ' '),
+                "Baseline API": Number(avgB.toFixed(3)),
+                "Hybrid Cascade": Number(avgC.toFixed(3)),
+            };
+        });
+    }, [rq2]);
+
+    // --- RQ3 Processing ---
+    const rq3Metrics = useMemo(() => {
+        if (rq3.length === 0) return [];
+        const refM = computeF2Metrics(rq3, 'referee_pred', 'true_label');
+        const baseM = computeF2Metrics(rq3, 'baseline_pred', 'true_label');
+        return [
+            { Metric: "Precision", Referee: refM.Precision, Baseline: baseM.Precision },
+            { Metric: "Recall", Referee: refM.Recall, Baseline: baseM.Recall },
+            { Metric: "F2 Score", Referee: refM.F2, Baseline: baseM.F2 },
+        ];
+    }, [rq3]);
+
+    // --- RQ4 Processing ---
+    const rq4Box = useMemo(() => {
+        if (rq4.length === 0) return [];
+        const groups: Record<string, number[]> = {};
+        rq4.forEach(d => {
+            if (d.domain && d.f1_score != null) {
+                if (!groups[d.domain]) groups[d.domain] = [];
+                groups[d.domain].push(d.f1_score);
+            }
+        });
+
+        return Object.keys(groups).map(domain => {
+            const arr = groups[domain];
+            const sorted = [...arr].sort((a, b) => a - b);
+            const min = sorted[0];
+            const max = sorted[sorted.length - 1];
+            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+
+            return {
+                domain,
+                min: Number(min?.toFixed(3)),
+                mean: Number(mean?.toFixed(3)),
+                max: Number(max?.toFixed(3)),
+            };
+        });
+    }, [rq4]);
+
+
+    if (!mounted || loading) {
+        return <div className="flex h-screen items-center justify-center p-8 bg-slate-50">
+            <div className="flex flex-col items-center">
+                <Activity className="h-12 w-12 text-indigo-500 animate-spin mb-4" />
+                <p className="text-lg text-slate-600 font-medium">Initializing Live Evaluation Suite...</p>
+            </div>
+        </div>
+    }
 
     return (
-        <div className="p-8 space-y-8 bg-slate-50 min-h-screen text-slate-900">
-            <div className="flex justify-between items-center">
+        <div className="p-4 md:p-8 space-y-12 bg-slate-50 min-h-screen text-slate-900 pb-20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Evaluation Suite</h1>
-                    <p className="text-slate-500 mt-2">Scale: {sampleSize} samples per stream</p>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                        <Activity className="h-8 w-8 text-indigo-600" />
+                        Live Evaluation Suite
+                    </h1>
+                    <p className="text-slate-500 mt-2 text-lg">
+                        DocuMind Hybrid Validation Dashboards (Auto-syncs with backend orchestrator)
+                    </p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <label className="text-sm font-medium">Sample Size:</label>
-                    <Input
-                        type="number"
-                        value={sampleSize}
-                        onChange={(e) => setSampleSize(Number(e.target.value))}
-                        className="w-32 bg-white"
-                    />
+                <div className="mt-4 md:mt-0 flex items-center px-4 py-2 bg-indigo-100 border border-indigo-200 text-indigo-800 rounded-full text-sm font-semibold shadow-sm">
+                    <span className="relative flex h-3 w-3 mr-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                    </span>
+                    Live Sync Active
                 </div>
             </div>
 
-            {/* Research Questions Overview */}
-            <Card className="bg-white border-indigo-100 shadow-sm">
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-xl text-indigo-900">Research Questions</CardTitle>
-                    <CardDescription>The core scientific questions validating the DocuMind Hybrid AI Framework.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 gap-y-4 text-sm">
-                        <div>
-                            <p className="mb-1"><span className="font-bold text-indigo-700">RQ1 (Trilemma Analysis):</span></p>
-                            <p className="text-slate-600">Can an intelligent orchestration framework reduce processing costs and latency while maintaining accuracy compared to a single-model baseline?</p>
-                        </div>
-                        <div>
-                            <p className="mb-1"><span className="font-bold text-indigo-700">RQ2 (Routing Efficiency):</span></p>
-                            <p className="text-slate-600">Does the "Gatekeeper" mechanism significantly reduce total token usage by routing simple documents to smaller models?</p>
-                        </div>
-                        <div>
-                            <p className="mb-1"><span className="font-bold text-indigo-700">RQ3 (Referee Validation):</span></p>
-                            <p className="text-slate-600">Can a "Referee" agent (Stream B) correctly identify and self-heal hallucinations or logic errors in generated outputs?</p>
-                        </div>
-                        <div>
-                            <p className="mb-1"><span className="font-bold text-indigo-700">RQ4 (Domain Adaptation):</span></p>
-                            <p className="text-slate-600">Can the framework adapt to new domains (e.g., Legal) with less than 20% performance degradation using RAG-based few-shot learning?</p>
-                        </div>
-                        <div>
-                            <p className="mb-1"><span className="font-bold text-indigo-700">RQ5 (Visual Extraction):</span></p>
-                            <p className="text-slate-600">Does Stream C's multimodal approach extract structured data from charts/graphs more accurately than traditional OCR text-only conversion?</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            {/* RQ1: The Trilemma */}
+            <section className="space-y-6">
+                <div className="space-y-3">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                        <Cpu className="h-6 w-6 text-blue-600" /> RQ1: The Trilemma (Accuracy, Cost, Latency)
+                    </h2>
+                    <p className="text-slate-600 max-w-4xl leading-relaxed bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                        This section evaluates the core hypothesis of the Hybrid Framework. Traditional LLM pipelines suffer from high abstraction costs when determining logic structure. Here, we continuously compare the Hybrid Cascade Orchestrator against a pure Baseline LLM for extracting exact data. As empirical data flows in, we hypothesize the Hybrid framework achieves near-identical high accuracy at a fraction of the cost and time footprint.
+                    </p>
+                </div>
 
-            {/* Scientific Validation Progress Dashboard */}
-            {
-                history.length > 0 && (
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-slate-900">Scientific Validation Progress</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-                            {TEST_CONFIG.map((test) => {
-                                const testHistory = history.filter(h => h.test_type === test.id);
-                                const totalRuns = testHistory.length;
-                                const significantRuns = testHistory.filter(h => h.significant).length;
-                                const successRate = totalRuns > 0 ? (significantRuns / totalRuns) * 100 : 0;
-                                const avgPValue = totalRuns > 0
-                                    ? testHistory.reduce((acc, curr) => acc + (curr.p_value || 0), 0) / totalRuns
-                                    : 0;
-
-                                return (
-                                    <Card key={test.id} className="bg-white border-slate-200">
-                                        <CardContent className="pt-6">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="text-sm font-medium text-slate-500">{test.id}</div>
-                                                <div className="text-xs font-mono text-slate-400">{totalRuns} Runs</div>
-                                            </div>
-                                            <div className="text-2xl font-bold text-slate-900 mb-1">
-                                                {successRate.toFixed(1)}%
-                                            </div>
-                                            <div className="text-xs text-slate-500 mb-3">Success Rate</div>
-
-                                            <div className="w-full bg-slate-100 rounded-full h-2 mb-4">
-                                                <div
-                                                    className={`h-2 rounded-full ${successRate >= 80 ? 'bg-green-500' : successRate >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                                                    style={{ width: `${successRate}%` }}
-                                                />
-                                            </div>
-
-                                            <div className="flex justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-                                                <span>Avg P-Value:</span>
-                                                <span className="font-mono">{avgPValue.toFixed(4)}</span>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                )
-                            })}
-                        </div>
-                    </div>
-                )
-            }
-
-            <div className="mt-8">
-                <h2 className="text-xl font-bold text-slate-900 mb-4">Available Tests ({TEST_CONFIG.length})</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                    {TEST_CONFIG.map((test) => (
-                        <Card key={test.id} className="hover:shadow-lg transition-shadow border-t-4 border-t-indigo-500 flex flex-col">
-                            <CardHeader>
-                                <div className="text-xs font-semibold text-indigo-600 mb-1">{test.stream}</div>
-                                <CardTitle className="text-lg">{test.title}</CardTitle>
-                                <CardDescription className="text-xs mt-2 min-h-[40px]">{test.description}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="mt-auto">
-                                <div className="text-xs text-slate-400 mb-4 font-mono bg-slate-100 p-2 rounded">
-                                    Method: {test.method}
-                                </div>
-                                <Button
-                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                                    onClick={() => runTest(test.id)}
-                                    disabled={loading}
-                                >
-                                    {loading ? "Running..." : <><Play className="w-4 h-4 mr-2" /> Run Test</>}
-                                </Button>
+                {rq1.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card className="hover:shadow-md transition-shadow border-slate-200">
+                            <CardHeader><CardTitle className="text-sm font-bold text-slate-600 uppercase tracking-wider">Extraction Accuracy (%)</CardTitle></CardHeader>
+                            <CardContent className="h-72">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={rq1Stats.accuracy} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                        <XAxis dataKey="name" tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <YAxis domain={[0, 100]} tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                        <Bar dataKey="accuracy" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={50} />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </CardContent>
                         </Card>
-                    ))}
-                </div>
-            </div>
-
-            {
-                latestResult && (
-                    <div className="bg-white p-6 rounded-lg shadow border border-slate-200 animate-in fade-in slide-in-from-bottom-4 mt-8">
-                        <h2 className="text-xl font-bold mb-4 flex items-center">
-                            <Activity className="w-6 h-6 mr-2 text-indigo-500" />
-                            Latest Result: {TEST_CONFIG.find(t => t.id === latestResult.test_type)?.title || latestResult.test_type}
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div className="p-4 bg-slate-50 rounded-md">
-                                <p className="text-sm text-slate-500">P-Value</p>
-                                <p className="text-2xl font-mono">{latestResult.p_value.toFixed(5)}</p>
-                            </div>
-                            <div className="p-4 bg-slate-50 rounded-md">
-                                <p className="text-sm text-slate-500">Statistic</p>
-                                <p className="text-2xl font-mono">{latestResult.stat_statistic.toFixed(3)}</p>
-                            </div>
-                            <div className="p-4 bg-slate-50 rounded-md">
-                                <p className="text-sm text-slate-500">Significance</p>
-                                <p className={`text-2xl font-bold ${latestResult.significant ? "text-green-600" : "text-amber-600"}`}>
-                                    {latestResult.significant ? "SIGNIFICANT" : "NOT SIGNIFICANT"}
-                                </p>
-                            </div>
-                        </div>
-
-                        <TestCharts result={latestResult} />
-                    </div>
-                )
-            }
-
-            <div className="mt-12 bg-white p-6 rounded-lg border border-slate-200">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Test History</h3>
-                    <Button variant="outline" size="sm" onClick={fetchHistory}>
-                        Refresh
-                    </Button>
-                </div>
-
-                {history.length === 0 ? (
-                    <div className="text-center p-8 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                        <AlertTriangle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                        <p>No test history available yet. Run a test to see results here.</p>
+                        <Card className="hover:shadow-md transition-shadow border-slate-200">
+                            <CardHeader><CardTitle className="text-sm font-bold text-slate-600 uppercase tracking-wider">Processing Cost per Doc ($)</CardTitle></CardHeader>
+                            <CardContent className="h-72">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={rq1Stats.cost} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                        <XAxis dataKey="name" tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <YAxis tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                        <Bar dataKey="cost" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={50} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                        <Card className="hover:shadow-md transition-shadow border-slate-200">
+                            <CardHeader><CardTitle className="text-sm font-bold text-slate-600 uppercase tracking-wider">Pipeline Latency (s)</CardTitle></CardHeader>
+                            <CardContent className="h-72">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={rq1Stats.time} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                        <XAxis dataKey="name" tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <YAxis tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                        <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                        <Bar dataKey="time" fill="#22c55e" radius={[6, 6, 0, 0]} barSize={50} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-slate-500 uppercase bg-slate-50">
-                                <tr>
-                                    <th className="px-4 py-3">Timestamp</th>
-                                    <th className="px-4 py-3">Test Type</th>
-                                    <th className="px-4 py-3">Sample Size</th>
-                                    <th className="px-4 py-3">Outcome</th>
-                                    <th className="px-4 py-3">P-Value</th>
-                                    <th className="px-4 py-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {history.slice().reverse().map((h) => (
-                                    <tr key={h.test_id} className="border-b hover:bg-slate-50">
-                                        <td className="px-4 py-3">{new Date(h.timestamp).toLocaleString()}</td>
-                                        <td className="px-4 py-3 font-medium">{h.test_type}</td>
-                                        <td className="px-4 py-3">{h.sample_size}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${h.significant ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                {h.significant ? "Significant" : "Not Significant"}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 font-mono">{h?.p_value?.toFixed(4) || "N/A"}</td>
-                                        <td className="px-4 py-3">
-                                            <Button variant="ghost" size="sm" onClick={() => handleExport(h.test_id)}>
-                                                <Download className="w-4 h-4 mr-2" />
-                                                Export
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="p-8 bg-white rounded-xl border border-dashed border-slate-300 text-center text-slate-500 animate-pulse">
+                        Waiting on Orchestrator... No RQ1 Data Found
                     </div>
                 )}
-            </div>
-        </div >
+            </section>
+
+            <hr className="border-slate-200" />
+
+            {/* RQ2: Cost Optimization */}
+            <section className="space-y-6">
+                <div className="space-y-3">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                        <Coins className="h-6 w-6 text-purple-600" /> RQ2: Routing Cost Efficiency
+                    </h2>
+                    <p className="text-slate-600 max-w-4xl leading-relaxed bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                        This evaluates the gating efficiency of the Multi-Modal Gatekeeper by charting the absolute expenditure (USD) between document formats. A traditional baseline forces all unstructured documents indiscriminately through a costly Azure Document Intelligence OCR API. Our Hybrid framework successfully intercepts digital-native documents upstream, dynamically routing them towards computationally inexpensive local extractions, establishing a massive cost delta without losing accuracy.
+                    </p>
+                </div>
+
+                {rq2.length > 0 ? (
+                    <Card className="hover:shadow-md transition-shadow border-slate-200">
+                        <CardHeader>
+                            <CardTitle className="text-lg text-slate-700">Average Processing Cost per Document ($)</CardTitle>
+                            <CardDescription>Comparing Universal Azure OCR (Baseline) vs Dynamic Gatekeeper Routing</CardDescription>
+                        </CardHeader>
+                        <CardContent className="h-[400px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={rq2CostComparison} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="category" tick={{ fill: '#64748b', fontSize: 14, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <YAxis tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                    <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Bar dataKey="Baseline API" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                                    <Bar dataKey="Hybrid Cascade" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="p-8 bg-white rounded-xl border border-dashed border-slate-300 text-center text-slate-500 animate-pulse">
+                        Waiting on Orchestrator... No RQ2 Data Found
+                    </div>
+                )}
+            </section>
+
+            <hr className="border-slate-200" />
+
+            {/* RQ3: Referee Validation */}
+            <section className="space-y-6">
+                <div className="space-y-3">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                        <ShieldAlert className="h-6 w-6 text-teal-600" /> RQ3: Self-Healing & Referee Validations
+                    </h2>
+                    <p className="text-slate-600 max-w-4xl leading-relaxed bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                        How highly can we trust autonomous AI? This section tests the "Referee" Agent's structural ability to catch hallucinations visually when verifying invoices against the FUTURA dataset. By plotting <strong>F2-Scores</strong> instead of accuracy, we intentionally heavily weigh <em>Recall</em>, verifying the agent errors on the side of caution rather than letting faulty logic pass.
+                    </p>
+                </div>
+
+                {rq3.length > 0 ? (
+                    <Card className="hover:shadow-md transition-shadow border-slate-200">
+                        <CardHeader>
+                            <CardTitle className="text-lg text-slate-700">Referee Output vs Baseline Accuracy (Binary Error Classification)</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-[400px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={rq3Metrics} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="Metric" tick={{ fill: '#64748b', fontSize: 14, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <YAxis domain={[0, 1.0]} tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                    <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Bar dataKey="Referee" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+                                    <Bar dataKey="Baseline" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="p-8 bg-white rounded-xl border border-dashed border-slate-300 text-center text-slate-500 animate-pulse">
+                        Waiting on Orchestrator... No RQ3 Data Found
+                    </div>
+                )}
+            </section>
+
+            <hr className="border-slate-200" />
+
+            {/* RQ4: Domain Adaptation */}
+            <section className="space-y-6">
+                <div className="space-y-3">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                        <FileSearch className="h-6 w-6 text-rose-600" /> RQ4: Zero-Shot Domain Transferability
+                    </h2>
+                    <p className="text-slate-600 max-w-4xl leading-relaxed bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                        The ultimate test of a generalized orchestrator. Tests if the system can generalize to completely new datasets (Healthcare, Legal Contracts vs. Baseline Tax Forms) without re-training models. Testing the hypothesis that the performance (Macro F1-Score) drop should not exceed roughly 20% when facing novel schema.
+                    </p>
+                </div>
+
+                {rq4.length > 0 ? (
+                    <Card className="hover:shadow-md transition-shadow border-slate-200">
+                        <CardHeader>
+                            <CardTitle className="text-lg text-slate-700">Domain Adaptation Performance Distribution (F1 Score)</CardTitle>
+                            <CardDescription>Measuring variance in extracting complex key-pairs</CardDescription>
+                        </CardHeader>
+                        <CardContent className="h-[400px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart data={rq4Box} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="domain" tick={{ fill: '#64748b', fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <YAxis domain={[0, 1.0]} tick={{ fill: '#64748b' }} tickLine={false} axisLine={false} />
+                                    <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+
+                                    <Bar dataKey="mean" fill="#818cf8" name="Mean F1 Score" radius={[6, 6, 0, 0]} barSize={80} />
+                                    <Scatter dataKey="min" fill="#ef4444" name="Minimum F1 Detected" />
+                                    <Scatter dataKey="max" fill="#22c55e" name="Maximum F1 Detected" />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="p-8 bg-white rounded-xl border border-dashed border-slate-300 text-center text-slate-500 animate-pulse">
+                        Waiting on Orchestrator... No RQ4 Data Found
+                    </div>
+                )}
+            </section>
+
+        </div>
     )
 }

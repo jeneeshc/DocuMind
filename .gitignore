@@ -1,18 +1,38 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+# Dependencies
+node_modules/
+.venv/
 venv/
-.env
+env/
+__pycache__/
+*.pyc
 
-# DataSources (Too large for Git)
-# DataSources (Too large for Git)
+# Local Data and References (Excluded per Request)
 datasources/
+references/
+test_results.db
+*.csv
 
-# Logs
-*.log
-npm-debug.log*
+# Sensitive Information & Keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+*.secret
 
-# OS
+# Next.js Build Output
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
 .DS_Store
-Thumbs.db
+
+# Temporary and Cache
+tmp/
+temp/
+.pytest_cache/
