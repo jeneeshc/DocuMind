@@ -25,6 +25,95 @@ The orchestration layer categorizes inbound documents through a deterministic se
 | **Stream C** | Semi-Structured Image Layouts (Invoices, IDs, Engineering Docs) | Rasterized image origins or Deep Learning Layout matching (FUNSD/FATURA templates). | **Visual Extraction:** Leverages Azure Document Intelligence to convert complex tables/bolding into unified spatial Markdown, mapped to JSON by an LLM core. |
 | **Stream D** | Unstructured Complex Text (Legal Contracts, Clinical Notes) | Default fallback for dense, unpredictable text structures (>80% text-to-space ratio). | **Semantic Pruning (RAG-Light):** Embeds chunks using `all-MiniLM-L6-v2` and FAISS Cosine Similarity retrieval to prune context before LLM reasoning. |
 
+### Visual Architecture
+
+```mermaid
+graph TD
+    %% Define Styles
+    classDef frontend fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef backend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef stream fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
+    classDef external fill:#8b5cf6,stroke:#5b21b6,stroke-width:2px,color:#fff;
+    classDef storage fill:#64748b,stroke:#334155,stroke-width:2px,color:#fff;
+    classDef ml fill:#ec4899,stroke:#be185d,stroke-width:2px,color:#fff;
+
+    %% Client App
+    subgraph Client ["Frontend App (Next.js 16 + React 19 + Tailwind CSS)"]
+        UI["Web Interface UI<br/>(File Upload, Queries)"]:::frontend
+        Dashboard["Evaluation Suite Dashboard<br/>(Recharts)"]:::frontend
+    end
+
+    %% Backend Server
+    subgraph Backend ["Backend API (FastAPI + Uvicorn)"]
+        Router["API Router (app/api.py)"]:::backend
+        DB_Layer["Database Models/ORM<br/>(SQLAlchemy/Pydantic)"]:::backend
+        
+        %% Core Logic
+        subgraph Core ["Core Orchestration"]
+            Gatekeeper["Gatekeeper<br/>(Cascade Classifier/Router)"]:::backend
+            DA["Domain Adaptation Logic"]:::backend
+        end
+        
+        %% Steams
+        subgraph Streams ["4-Stream Processing Pipeline"]
+            StreamA["Stream A<br/>Digital Native Data<br/>(CSV/Excel/JSON)"]:::stream
+            StreamB["Stream B<br/>Fixed-Layout Forms<br/>(PyMuPDF)"]:::stream
+            StreamC["Stream C<br/>Semi-Structured Layouts<br/>(Visually Complex)"]:::stream
+            StreamD["Stream D<br/>Unstructured Text<br/>(RAG-Light/Pruning)"]:::stream
+            
+            Referee["Referee Agent<br/>(Verification/Fallback)"]:::ml
+        end
+    end
+
+    %% External Services
+    subgraph External ["External AI Services"]
+        FalAI["Fal.ai API<br/>(llama-3.1-8b-instruct)"]:::external
+        AzureDI["Azure Form Recognizer<br/>(Document Intelligence)"]:::external
+        OpenAI["OpenAI API"]:::external
+        Embeddings["Embedding Models<br/>(all-MiniLM-L6-v2)"]:::external
+    end
+
+    %% Storage
+    subgraph StorageLayer ["Persistence Layer"]
+        SQLite[("SQLite Database<br/>test_results.db")]:::storage
+        CSVStore[("Results Data<br/>Results/rq1_data.csv")]:::storage
+        VectorDB[("FAISS Semantic Storage")]:::storage
+    end
+
+    %% Relationships
+    UI -->|Multipart File Upload| Router
+    Dashboard <-->|Fetch Metrics| Router
+    
+    Router --> Gatekeeper
+    Router --> DB_Layer
+    DB_Layer --> SQLite
+    DB_Layer --> CSVStore
+    
+    Gatekeeper -->|Route: MIME/Metadata| StreamA
+    Gatekeeper -->|Route: Layout Ontologies| StreamB
+    Gatekeeper -->|Route: Raster/Deep Learning| StreamC
+    Gatekeeper -->|Route: Dense Text (Default)| StreamD
+
+    %% Stream Operations
+    StreamA -->|Logic Synthesis| FalAI
+    StreamB -->|Extract| Referee
+    Referee -->|Fallback Anomaly| OpenAI
+    StreamC -->|Visual Markdown Mapping| AzureDI
+    AzureDI --> StreamC
+    StreamC -->|JSON Extraction| OpenAI
+    StreamD --> DA
+    DA --> Embeddings
+    Embeddings --> VectorDB
+    VectorDB --> StreamD
+    StreamD -->|Context Pruning| OpenAI
+    
+    %% Output
+    StreamA -->|Return Data| Router
+    StreamB -->|Return Data| Router
+    StreamC -->|Return Data| Router
+    StreamD -->|Return Data| Router
+```
+
 ---
 
 ## 3. Data Sources & Empirically Validated Pre-Processing
