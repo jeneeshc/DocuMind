@@ -197,6 +197,27 @@ export default function AboutPage() {
                     <Card className="bg-[#050810] border-gray-800">
                         <CardHeader>
                             <CardTitle className="text-white flex items-center">
+                                <Activity className="w-5 h-5 mr-2 text-blue-400" />
+                                Trilemma Optimization (RQ1)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-400">Hybrid routing maintains Pareto-optimal accuracy while drastically dropping pure multimodal processing time.</p>
+                                <div className="p-4 bg-gray-900 rounded-lg border border-gray-800 flex justify-between items-center">
+                                    <div className="text-center w-full">
+                                        <div className="text-xs text-blue-500 uppercase">Average Latency Drop</div>
+                                        <div className="text-xl font-bold text-blue-400">Δ ≈ 1.83s <span className="text-sm font-normal text-gray-500">/ doc</span></div>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-center text-blue-400 font-medium bg-blue-900/20 py-2 rounded">100% Structural Extraction Parity vs Fixed Baselines</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#050810] border-gray-800">
+                        <CardHeader>
+                            <CardTitle className="text-white flex items-center">
                                 <BarChart3 className="w-5 h-5 mr-2 text-indigo-400" />
                                 Macro Cost Reduction (RQ2)
                             </CardTitle>
@@ -216,6 +237,27 @@ export default function AboutPage() {
                                     </div>
                                 </div>
                                 <p className="text-xs text-center text-emerald-400 font-medium bg-emerald-900/20 py-2 rounded">↓ 92% Expenditure Drop (η = 0.08)</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#050810] border-gray-800">
+                        <CardHeader>
+                            <CardTitle className="text-white flex items-center">
+                                <ShieldCheck className="w-5 h-5 mr-2 text-rose-400" />
+                                Self-Healing Validation (RQ3)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-400">Referee Agent significantly improves F2-Score Recall against naive agent consensus in noisy scanned environments.</p>
+                                <div className="p-4 bg-gray-900 rounded-lg border border-gray-800 flex justify-between items-center">
+                                    <div className="text-center w-full">
+                                        <div className="text-xs text-rose-500 uppercase">False Positive Alarm Rate</div>
+                                        <div className="text-xl font-bold text-rose-400">&lt; 15% Max Limit</div>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-center text-rose-400 font-medium bg-rose-900/20 py-2 rounded">Paired symmetry verified via McNemar&apos;s Test (\u03C7\u00B2)</p>
                             </div>
                         </CardContent>
                     </Card>
