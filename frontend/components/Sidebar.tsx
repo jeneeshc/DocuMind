@@ -40,22 +40,22 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
     ]
 
     return (
-        <div className={cn("space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white transition-all duration-300", isCollapsed ? "w-20" : "w-72")}>
+        <div className={cn("space-y-4 py-4 flex flex-col h-full bg-slate-50 text-slate-900 border-r border-slate-200 transition-all duration-300", isCollapsed ? "w-20" : "w-72")}>
             <div className="px-3 py-2 flex-1">
                 <div className={cn("flex items-center mb-14", isCollapsed ? "justify-center flex-col gap-y-4" : "pl-3 justify-between")}>
                     <Link href="/" className="flex items-center">
                         <div className="relative w-8 h-8 mr-4">
-                            <BrainCircuit className="w-8 h-8 text-white" />
+                            <BrainCircuit className="w-8 h-8 text-blue-600" />
                         </div>
                         {!isCollapsed && (
-                            <h1 className="text-2xl font-bold text-white whitespace-nowrap">
+                            <h1 className="text-2xl font-bold text-slate-900 whitespace-nowrap">
                                 DocuMind
                             </h1>
                         )}
                     </Link>
                     <button
                         onClick={onCollapse}
-                        className={cn("text-zinc-400 hover:text-white transition", isCollapsed ? "" : "ml-auto")}
+                        className={cn("text-slate-500 hover:text-slate-900 transition", isCollapsed ? "" : "ml-auto")}
                     >
                         <PanelLeft className="w-6 h-6" />
                     </button>
@@ -66,8 +66,8 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
                             key={route.href}
                             href={route.href}
                             className={cn(
-                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                pathname === route.href ? "text-white bg-white/10" : "text-zinc-400",
+                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-slate-900 hover:bg-slate-200/50 rounded-lg transition",
+                                pathname === route.href ? "text-slate-900 bg-slate-200 border border-slate-300 shadow-sm" : "text-slate-600",
                                 isCollapsed && "justify-center"
                             )}
                         >

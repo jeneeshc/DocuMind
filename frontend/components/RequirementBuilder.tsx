@@ -46,14 +46,14 @@ export function RequirementBuilder({ fileType, onChange }: RequirementBuilderPro
     };
 
     return (
-        <Card className="bg-gray-800/60 border-gray-700/50 mt-4 shadow-sm w-full">
+        <Card className="bg-white border-slate-200 mt-4 shadow-sm w-full">
             <CardContent className="p-4 space-y-4">
                 {fileType === "tabular" ? (
                     <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-blue-400">Data Transformation Requirements</h4>
-                        <p className="text-xs text-gray-400">Describe the logical transformations, grouping, or aggregations you need applied to this dataset.</p>
+                        <h4 className="text-sm font-medium text-blue-600">Data Transformation Requirements</h4>
+                        <p className="text-xs text-slate-500">Describe the logical transformations, grouping, or aggregations you need applied to this dataset.</p>
                         <textarea
-                            className="w-full bg-[#0B1121] border border-gray-700 rounded-md p-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-md p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
                             placeholder="e.g., Sum the total sales by Region, filter out nulls, and provide the average Deal Size."
                             rows={3}
                             value={instruction}
@@ -62,13 +62,13 @@ export function RequirementBuilder({ fileType, onChange }: RequirementBuilderPro
                     </div>
                 ) : (
                     <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-emerald-400">Extraction Schema Definition</h4>
-                        <p className="text-xs text-gray-400">Define the exact data points you want the AI to extract from this document.</p>
+                        <h4 className="text-sm font-medium text-emerald-600">Extraction Schema Definition</h4>
+                        <p className="text-xs text-slate-500">Define the exact data points you want the AI to extract from this document.</p>
 
                         <div className="flex space-x-2">
                             <input
                                 type="text"
-                                className="flex-1 bg-[#0B1121] border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                className="flex-1 bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                                 placeholder="e.g., Invoice Number, Total Amount, Supplier Name"
                                 value={newField}
                                 onChange={(e) => setNewField(e.target.value)}
@@ -76,7 +76,7 @@ export function RequirementBuilder({ fileType, onChange }: RequirementBuilderPro
                             />
                             <button
                                 type="button"
-                                className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 px-3 py-2 rounded-md flex items-center transition border border-emerald-500/30 text-sm font-medium"
+                                className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-2 rounded-md flex items-center transition border border-emerald-200 text-sm font-medium"
                                 onClick={addField}
                             >
                                 <Plus className="w-4 h-4 mr-1" /> Add
@@ -84,8 +84,8 @@ export function RequirementBuilder({ fileType, onChange }: RequirementBuilderPro
                         </div>
 
                         {fields.length > 0 && (
-                            <div className="mt-4 p-3 bg-gray-900/50 rounded border border-gray-800">
-                                <div className="flex items-center mb-2 text-xs text-gray-400 uppercase font-semibold">
+                            <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <div className="flex items-center mb-2 text-xs text-slate-500 uppercase font-semibold">
                                     <ListPlus className="w-3 h-3 mr-1" />
                                     Target Fields ({fields.length})
                                 </div>
@@ -93,13 +93,13 @@ export function RequirementBuilder({ fileType, onChange }: RequirementBuilderPro
                                     {fields.map((field) => (
                                         <div
                                             key={field}
-                                            className="bg-[#0B1121] border border-gray-700 rounded-full px-3 py-1 flex items-center shadow-sm text-sm"
+                                            className="bg-white border border-slate-300 rounded-full px-3 py-1 flex items-center shadow-sm text-sm"
                                         >
-                                            <span className="text-gray-300 mr-2">{field}</span>
+                                            <span className="text-slate-800 mr-2">{field}</span>
                                             <button
                                                 type="button"
                                                 onClick={() => removeField(field)}
-                                                className="text-gray-500 hover:text-red-400 transition"
+                                                className="text-slate-400 hover:text-red-500 transition"
                                             >
                                                 <X className="w-3 h-3" />
                                             </button>
