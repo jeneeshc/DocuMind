@@ -92,7 +92,7 @@ graph TD
     Gatekeeper -->|Route: MIME/Metadata| StreamA
     Gatekeeper -->|Route: Layout Ontologies| StreamB
     Gatekeeper -->|Route: Raster/Deep Learning| StreamC
-    Gatekeeper -->|Route: Dense Text (Default)| StreamD
+    Gatekeeper -->|Route: Dense Text Default| StreamD
 
     %% Stream Operations
     StreamA -->|Logic Synthesis| FalAI
