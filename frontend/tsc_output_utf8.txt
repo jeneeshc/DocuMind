@@ -1,0 +1,15 @@
+﻿app/api/evaluation/route.ts(47,33): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(48,33): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(50,13): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(54,20): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(96,34): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(97,34): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(99,13): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(103,20): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(143,36): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(144,34): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(184,31): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(185,24): error TS18046: 'row' is of type 'unknown'.
+app/api/evaluation/route.ts(187,13): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ Tax: { sum: number; count: number; }; Legal: { sum: number; count: number; }; Healthcare: { sum: number; count: number; }; }'.
+app/api/evaluation/route.ts(188,13): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ Tax: { sum: number; count: number; }; Legal: { sum: number; count: number; }; Healthcare: { sum: number; count: number; }; }'.
+app/api/evaluation/route.ts(189,13): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ Tax: { sum: number; count: number; }; Legal: { sum: number; count: number; }; Healthcare: { sum: number; count: number; }; }'.

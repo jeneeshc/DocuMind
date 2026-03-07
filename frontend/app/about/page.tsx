@@ -1,8 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { BrainCircuit, Database, ScanLine, FileText, Activity, ShieldCheck, Scale, Shuffle, Users, CheckCircle, BarChart3, Binary, FastForward, Table, ArrowRight } from "lucide-react"
-import Image from "next/image"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ShieldCheck, Activity, Scale, Binary, Table, ArrowRight, Users } from "lucide-react"
+import Link from "next/link"
 
 export default function AboutPage() {
     return (
@@ -72,235 +72,16 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            {/* SECTION 2: Research Questions */}
-            <div className="space-y-6 pt-8">
-                <div className="border-b border-slate-300 pb-2 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                        <span className="bg-emerald-100 text-emerald-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">2</span>
-                        Research Questions & Methodologies
-                    </h2>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card className="bg-white border-slate-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-800">RQ1: Hybrid vs Baseline Efficiency</CardTitle>
-                            <CardDescription className="text-blue-600 text-xs font-mono">Methodology: MANOVA & TOST</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-sm text-slate-600">
-                            Evaluates if the hybrid architecture balances cost, accuracy, and latency simultaneously without family-wise error inflation against a forced LLM baseline.
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-800">RQ2: Cascade Classification Cost</CardTitle>
-                            <CardDescription className="text-purple-600 text-xs font-mono">Methodology: Bootstrap Resampling</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-sm text-slate-600">
-                            Determines proportional token savings by routing natively-digital PDFs away from expensive OCR paths, evaluated via robust 10,000-replicate confidence intervals.
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-800">RQ3: Self-Healing Validation</CardTitle>
-                            <CardDescription className="text-rose-600 text-xs font-mono">Methodology: McNemar&apos;s Test</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-sm text-slate-600">
-                            Benchmarks a &quot;Referee Agent&quot; in flagging extraction anomalies against noisy scanned invoices, emphasizing F2-score Recall to prevent silent hallucinations.
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-800">RQ4: Zero-Shot Domain Adaptation</CardTitle>
-                            <CardDescription className="text-amber-600 text-xs font-mono">Methodology: TOST Equivalence</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-sm text-slate-600">
-                            Validates performance retention when shifting an orchestrator configured for Tax forms onto unseen Legal contracts or Healthcare summaries without fine-tuning.
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            {/* SECTION 3: Preprocessing */}
-            <div className="space-y-6 pt-8">
-                <div className="border-b border-slate-300 pb-2 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                        <span className="bg-purple-100 text-purple-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">3</span>
-                        Data Pre-Processing Methods
-                    </h2>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-5 items-start">
-                        <Database className="w-6 h-6 text-blue-600 mr-4 mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-slate-800">Stream A: Tabular Normalization</h4>
-                            <p className="text-sm text-slate-600 mt-1">Raw Fannie Mae & Northwind XML/XLSX assets are normalized into pure Pandas DataFrames and Canonical JSON arrays. This structural staging ensures the LLM script-generator can address a uniform schema regardless of file origin.</p>
-                        </div>
-                    </div>
-
-                    <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-5 items-start">
-                        <ScanLine className="w-6 h-6 text-rose-500 mr-4 mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-slate-800">Stream B/C: Custom Degradation Pipeline</h4>
-                            <p className="text-sm text-slate-600 mt-1">For RQ2 Scanned strata, over 200 digitally-native IRS forms were programmatically filled with synthetic Faker data, printed, and mathematically skewed up to ±15°, injected with Gaussian blur, and scanned. This simulated real-world OCR noise against an existing Ground Truth to test the Self-Healing agent.</p>
-                        </div>
-                    </div>
-
-                    <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-5 items-start">
-                        <FileText className="w-6 h-6 text-emerald-600 mr-4 mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-slate-800">Azure Layout Markdown Topography</h4>
-                            <p className="text-sm text-slate-600 mt-1">Before hitting the Llama-3.1 Vision parser, dense graphical inputs (invoices from FUNSD/FATURA) are processed by Azure Document Intelligence into rich Markdown (`# Headers`, `| Tables |`). This preserves relative spatial topography better than raw textual streams.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* SECTION 4: Iterative Strategy */}
-            <div className="space-y-6 pt-8">
-                <div className="border-b border-slate-300 pb-2 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                        <span className="bg-rose-100 text-rose-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">4</span>
-                        Experiment Iteration Strategy
-                    </h2>
-                </div>
-                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm text-slate-700">
-                    <div className="flex items-center mb-4">
-                        <FastForward className="w-6 h-6 text-rose-500 mr-3" />
-                        <h3 className="text-lg font-semibold text-slate-900">Parallel Automation Framework</h3>
-                    </div>
-                    <p className="text-sm leading-relaxed mb-4">
-                        To generate empirical data, a central Python orchestration script coordinated dataset loops and calculated parallel API extraction paths. The system dynamically allocated baseline costs (e.g. $0.05/document for intensive visual streams) against high-throughput `httpx` logic directly targeting the `Fal.ai` serverless proxy.
-                    </p>
-                    <ul className="list-disc pl-5 text-sm space-y-2 text-slate-600">
-                        <li><strong>Scale:</strong> Evaluated across strictly synthesized corpora (N=385 for RQ1, N=545 for RQ2).</li>
-                        <li><strong>Repetition:</strong> Iterative runs were repeated five times on separate days, with system caching purged between repetitions to nullify timing drift.</li>
-                        <li><strong>Averaging:</strong> Due to minor stochastic variances in LLM routing generation, each document instance was averaged across three inline executions per day to stabilize latency and accuracy variables.</li>
-                    </ul>
-                </div>
-            </div>
-
-            {/* SECTION 5: Results */}
-            <div className="space-y-6 pt-8">
-                <div className="border-b border-slate-300 pb-2 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                        <span className="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">5</span>
-                        Test Results & Metrics
-                    </h2>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition">
-                        <CardHeader>
-                            <CardTitle className="text-slate-900 flex items-center">
-                                <Activity className="w-5 h-5 mr-2 text-blue-600" />
-                                Trilemma Optimization (RQ1)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <p className="text-sm text-slate-600">Hybrid routing maintains Pareto-optimal accuracy while drastically dropping pure multimodal processing time.</p>
-                                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-                                    <div className="text-center w-full">
-                                        <div className="text-xs text-blue-600 uppercase font-bold">Average Latency Drop</div>
-                                        <div className="text-xl font-bold text-blue-600">Δ ≈ 1.83s <span className="text-sm font-normal text-slate-500">/ doc</span></div>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-center text-blue-700 font-medium bg-blue-100 py-2 rounded">100% Structural Extraction Parity vs Fixed Baselines</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition">
-                        <CardHeader>
-                            <CardTitle className="text-slate-900 flex items-center">
-                                <BarChart3 className="w-5 h-5 mr-2 text-indigo-600" />
-                                Macro Cost Reduction (RQ2)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <p className="text-sm text-slate-600">Cascading Digital Native documents to Stream B bypasses pure OCR overhead.</p>
-                                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-                                    <div>
-                                        <div className="text-xs text-slate-500 uppercase font-bold">Baseline LLM Cost</div>
-                                        <div className="text-xl font-bold text-rose-500">~$0.05 / doc</div>
-                                    </div>
-                                    <ArrowRight className="text-slate-400" />
-                                    <div className="text-right">
-                                        <div className="text-xs text-green-600 uppercase font-bold">Cascade Cost</div>
-                                        <div className="text-xl font-bold text-green-600">~$0.004 / doc</div>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-center text-emerald-700 font-medium bg-emerald-100 py-2 rounded">↓ 92% Expenditure Drop (η = 0.08)</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition">
-                        <CardHeader>
-                            <CardTitle className="text-slate-900 flex items-center">
-                                <ShieldCheck className="w-5 h-5 mr-2 text-rose-500" />
-                                Self-Healing Validation (RQ3)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <p className="text-sm text-slate-600">Referee Agent significantly improves F2-Score Recall against naive agent consensus in noisy scanned environments.</p>
-                                <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-                                    <div className="text-center w-full">
-                                        <div className="text-xs text-rose-600 uppercase font-bold">False Positive Alarm Rate</div>
-                                        <div className="text-xl font-bold text-rose-500">&lt; 15% Max Limit</div>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-center text-rose-700 font-medium bg-rose-100 py-2 rounded">Paired symmetry verified via McNemar&apos;s Test (\u03C7\u00B2)</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition">
-                        <CardHeader>
-                            <CardTitle className="text-slate-900 flex items-center">
-                                <CheckCircle className="w-5 h-5 mr-2 text-emerald-600" />
-                                Domain Adaptation F1 (RQ4)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left text-slate-600">
-                                    <thead className="text-xs text-slate-500 uppercase bg-slate-100 border-b border-slate-200">
-                                        <tr>
-                                            <th className="px-4 py-3">Domain (n=60)</th>
-                                            <th className="px-4 py-3">Structure</th>
-                                            <th className="px-4 py-3">Avg F1 Score</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className="border-b border-slate-100">
-                                            <td className="px-4 py-3 font-medium text-slate-900">Tax (Source)</td>
-                                            <td className="px-4 py-3">Forms/Tables</td>
-                                            <td className="px-4 py-3 text-emerald-600 font-mono font-bold">0.96</td>
-                                        </tr>
-                                        <tr className="border-b border-slate-100">
-                                            <td className="px-4 py-3 font-medium text-slate-900">Legal (Target)</td>
-                                            <td className="px-4 py-3">Unstructured Text</td>
-                                            <td className="px-4 py-3 text-emerald-600 font-mono font-bold">0.88</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="px-4 py-3 font-medium text-slate-900">Healthcare</td>
-                                            <td className="px-4 py-3">Dense Reports</td>
-                                            <td className="px-4 py-3 text-emerald-600 font-mono font-bold">0.85</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p className="text-xs text-slate-500 mt-4 text-center">Variance remained well within the rigid strict equivalence degradation bound (&Delta; = 20%).</p>
-                        </CardContent>
-                    </Card>
+            {/* Transition to Evaluation Suite */}
+            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-8 text-center max-w-3xl mx-auto space-y-4">
+                <h3 className="text-2xl font-bold text-indigo-900">Explore the Full Empirical Findings</h3>
+                <p className="text-indigo-700 max-w-xl mx-auto leading-relaxed">
+                    Dive deep into the methodologies, dataset pre-processing steps, and interactive live dashboards demonstrating the dynamic validation results across all Document Intelligence Research Questions.
+                </p>
+                <div className="pt-4">
+                    <Link href="/testing" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors">
+                        View Evaluation Suite <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
                 </div>
             </div>
 
