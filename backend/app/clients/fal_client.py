@@ -5,16 +5,19 @@ import hashlib
 
 class FalClient:
     def __init__(self):
-        self.api_key = os.getenv("FAL_KEY")
-        if not self.api_key:
+        # Read at init for diagnostics, but we will always re-read at call-time
+        # to ensure dotenv has been loaded by the time the first request comes in.
+        api_key = os.getenv("FAL_KEY")
+        if not api_key:
             print("Warning: FAL_KEY not found in environment variables.")
-        # We will use explicit httpx manually to match the user's curl
 
     async def generate_completion(self, system_prompt: str, user_prompt: str, model: str = ""):
         """
         Generates a completion from Fal.ai targeting the official any-llm endpoint via httpx.
         """
-        if not self.api_key:
+        # Always read at call-time so changes (e.g. late dotenv load) are reflected
+        api_key = os.getenv("FAL_KEY")
+        if not api_key:
              print("DEBUG: FAL_KEY missing. Using safe mock generation.")
              return "Mocked API Response (Missing Key)"
              
@@ -22,7 +25,7 @@ class FalClient:
             prompt = f"{system_prompt}\n\n{user_prompt}"
             
             headers = {
-                "Authorization": f"Key {self.api_key}",
+                "Authorization": f"Key {api_key}",
                 "Content-Type": "application/json"
             }
             
@@ -32,16 +35,21 @@ class FalClient:
             
             async with httpx.AsyncClient() as client:
                 # Using fal.run for synchronous response instead of queue.fal.run which requires polling
-                resp = await client.post("https://fal.run/fal-ai/any-llm", headers=headers, json=payload, timeout=120.0)
+                resp = await client.post("https://fal.run/fal-ai/any-llm", headers=headers, json=payload, timeout=30.0)
                 
                 if resp.status_code != 200:
                     print(f"Error calling Fal.ai any-llm HTTP ({resp.status_code}): {resp.text}")
-                    return "Error: Fal API Failure"
+                    return f"Error: Fal API returned {resp.status_code}: {resp.text[:200]}"
                 
                 return resp.json().get("output", "")
+        except httpx.TimeoutException:
+            err = "Error: Fal.ai API timed out after 30 seconds."
+            print(err)
+            return err
         except Exception as e:
-            print(f"Error calling Fal.ai any-llm Completion: {e}")
-            return "Error: Generation Exception"
+            err = f"Error: Generation Exception: {str(e)}"
+            print(err)
+            return err
 
     async def get_embedding(self, text: str, model: str = "text-embedding-3-small") -> List[float]:
         """

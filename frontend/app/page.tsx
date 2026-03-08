@@ -11,14 +11,36 @@ export default function DataTransformationPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [csvHeaders, setCsvHeaders] = useState<string[] | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const extractCsvHeaders = async (f: File) => {
+    if (f.name.toLowerCase().endsWith('.csv')) {
+      try {
+        const text = await f.slice(0, 5000).text();
+        const firstLine = text.split('\n')[0];
+        if (firstLine) {
+          setCsvHeaders(firstLine.split(',').map(h => h.trim().replace(/^"|"$/g, '')));
+        } else {
+          setCsvHeaders(null);
+        }
+      } catch (err) {
+        console.error("Failed to read CSV headers", err);
+        setCsvHeaders(null);
+      }
+    } else {
+      setCsvHeaders(null);
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0])
+      const selected = e.target.files[0];
+      setFile(selected)
       setSchema("") // Reset schema when new file is chosen
       setResult(null)
       setError(null)
+      extractCsvHeaders(selected)
     }
   }
 
@@ -38,10 +60,12 @@ export default function DataTransformationPage() {
     e.preventDefault()
     e.stopPropagation()
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0])
+      const selected = e.dataTransfer.files[0];
+      setFile(selected)
       setSchema("")
       setResult(null)
       setError(null)
+      extractCsvHeaders(selected)
     }
   }
 
@@ -124,7 +148,7 @@ export default function DataTransformationPage() {
                       <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                      onClick={(e) => { e.stopPropagation(); setFile(null); setCsvHeaders(null); setResult(null); }}
                       className="text-xs text-rose-500 hover:text-rose-600 underline"
                     >
                       Remove File
@@ -186,10 +210,29 @@ export default function DataTransformationPage() {
             </CardHeader>
             <CardContent className="p-6">
 
-              {!isProcessing && !result && !error && (
+              {!isProcessing && !result && !error && !csvHeaders && (
                 <div className="flex flex-col items-center justify-center h-[400px] text-slate-400 space-y-4">
                   <BrainCircuit className="w-16 h-16 opacity-30" />
                   <p>Awaiting payload submission.</p>
+                </div>
+              )}
+
+              {!isProcessing && !result && !error && csvHeaders && (
+                <div className="flex flex-col h-[400px] text-slate-600 space-y-4 overflow-hidden">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">Current Output Structure</h3>
+                    <p className="text-sm text-slate-500">Detected columns from your CSV upload.</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 overflow-y-auto flex-1">
+                    <ul className="space-y-2">
+                      {csvHeaders.map((header, idx) => (
+                        <li key={idx} className="flex items-center text-sm font-medium bg-white px-3 py-2 rounded-md border border-slate-100 shadow-sm">
+                          <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs mr-3">{idx + 1}</span>
+                          {header || <span className="text-slate-400 italic">Unnamed Column</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
 
@@ -212,25 +255,93 @@ export default function DataTransformationPage() {
 
               {result && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="flex items-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mr-4" />
-                    <div>
-                      <h3 className="text-emerald-700 font-bold">Extraction Successful</h3>
+                  <div className={`flex items-center p-4 border rounded-lg ${result.status === 'error' ? 'bg-rose-50 border-rose-200' : 'bg-emerald-50 border-emerald-200'}`}>
+                    {result.status === 'error' ? (
+                      <Activity className="w-8 h-8 text-rose-500 mr-4" />
+                    ) : (
+                      <CheckCircle2 className="w-8 h-8 text-emerald-500 mr-4" />
+                    )}
+                    <div className="flex-1">
+                      <h3 className={`font-bold ${result.status === 'error' ? 'text-rose-700' : 'text-emerald-700'}`}>
+                        {result.status === 'error' ? 'Processing Error' : 'Transformation / Extraction Successful'}
+                      </h3>
                       <p className="text-sm text-slate-600">
-                        Routed via <strong className="text-slate-900">Stream {result.stream_used}: {
-                          result.stream_used === "A" ? "Logic Synthesis" :
-                            result.stream_used === "B" ? "Self-Healing" :
-                              result.stream_used === "C" ? "Visual Extraction" :
-                                result.stream_used === "D" ? "Semantic Pruning" : "Unknown"
-                        }</strong>
+                        Routed via <strong className="text-slate-900">
+                          {(() => {
+                            const stream = result.stream_used || (file && getDocType(file.name) === 'tabular' ? 'A' : 'Unknown');
+                            return `Stream ${stream}: ${stream === "A" ? "Logic Synthesis" :
+                              stream === "B" ? "Self-Healing" :
+                                stream === "C" ? "Visual Extraction" :
+                                  stream === "D" ? "Semantic Pruning" : "Unknown"
+                              }`;
+                          })()}
+                        </strong>
                       </p>
                     </div>
                   </div>
 
+                  {result.generated_code && (
+                    <div className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                      <h4 className="text-xs uppercase text-slate-400 font-bold mb-3 tracking-wider">Generated Python Code (Stream A)</h4>
+                      <pre className="text-xs text-blue-300 font-mono whitespace-pre-wrap overflow-auto max-h-[250px] p-2 bg-black/30 rounded">
+                        {result.generated_code}
+                      </pre>
+                    </div>
+                  )}
+
+                  {result.status === 'error' && result.message && (
+                    <div className="bg-rose-50 rounded-lg border border-rose-200 p-4 overflow-auto max-h-[300px]">
+                      <h4 className="text-xs uppercase text-rose-500 font-bold mb-3 tracking-wider">Error Details</h4>
+                      <pre className="text-sm text-rose-800 font-mono whitespace-pre-wrap">
+                        {result.message}
+                      </pre>
+                    </div>
+                  )}
+
+                  {result.data && result.data._metadata && result.data._metadata.extractors && (
+                    <div className="bg-slate-50 rounded-lg border border-slate-200 p-4 mb-4">
+                      <h4 className="text-xs uppercase text-slate-500 font-bold mb-3 tracking-wider">Extraction Lineage</h4>
+                      <div className="space-y-2">
+                        {Object.entries(result.data._metadata.extractors).map(([field, extractor]) => (
+                          <div key={field} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-slate-100 shadow-sm">
+                            <span className="font-medium text-slate-700">{field}</span>
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${String(extractor).includes('Native') ? 'bg-blue-100 text-blue-700' :
+                                String(extractor).includes('LLM') ? 'bg-purple-100 text-purple-700' :
+                                  'bg-amber-100 text-amber-700'
+                              }`}>
+                              {String(extractor)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-slate-50 rounded-lg border border-slate-200 p-4 overflow-auto max-h-[500px]">
-                    <h4 className="text-xs uppercase text-slate-500 font-bold mb-3 tracking-wider">Extracted Payload</h4>
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-xs uppercase text-slate-500 font-bold tracking-wider">
+                        {result.status === 'error' ? 'Raw Response JSON' : 'Transformed Output / Extracted Payload'}
+                      </h4>
+                      <button
+                        onClick={() => {
+                          const payloadToDownload = result.status === 'error' ? result : (result.data || result);
+                          const blob = new Blob([JSON.stringify(payloadToDownload, null, 2)], { type: "application/json" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = result.status === 'error' ? "error_report.json" : "transformed_output.json";
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors"
+                      >
+                        Download JSON
+                      </button>
+                    </div>
                     <pre className="text-sm text-slate-800 font-mono whitespace-pre-wrap">
-                      {JSON.stringify(result.data, null, 2)}
+                      {JSON.stringify(result.status === 'error' ? result : (result.data || result), null, 2)}
                     </pre>
                   </div>
                 </div>

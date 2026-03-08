@@ -13,24 +13,47 @@ class Gatekeeper:
     """
     
     @staticmethod
+    def _extract_pdf_text(file_content: bytes, max_chars: int = 3000) -> str:
+        """
+        Uses PyMuPDF to extract readable text from a PDF for keyword analysis.
+        Falls back to raw bytes decoding for non-PDFs.
+        """
+        try:
+            import fitz
+            doc = fitz.open(stream=file_content, filetype="pdf")
+            text = ""
+            for page in doc:
+                text += page.get_text("text")
+                if len(text) >= max_chars:
+                    break
+            doc.close()
+            return text[:max_chars]
+        except Exception:
+            # Not a PDF or PyMuPDF failed, fall back to raw decode
+            return file_content[:max_chars].decode('utf-8', errors='ignore')
+
+    @staticmethod
     async def route(file_content: bytes, filename: str) -> str:
         """
         Autonomous Mode: Fail-fast logic applying lightweight checks first.
         """
-        # Layer 1: Metadata (Deterministic)
+        # Layer 1: Metadata (Deterministic) — tabular files go straight to Stream A
         ext = os.path.splitext(filename)[1].lower()
         if ext in ['.csv', '.xlsx', '.json', '.xml']:
             return "A"
             
-        # Layer 2: Heuristics (Keywords)
-        content_snippet = file_content[:2000].decode('utf-8', errors='ignore')
-        tax_keywords = ["Form 1040", "Tax Return", "IRS", "W-2"]
-        if any(kw in content_snippet for kw in tax_keywords):
+        # Layer 2: Heuristics (Keywords) — extract real text from PDFs first
+        if ext == '.pdf':
+            content_text = Gatekeeper._extract_pdf_text(file_content)
+        else:
+            content_text = file_content[:3000].decode('utf-8', errors='ignore')
+
+        tax_keywords = ["Form 1040", "Tax Return", "IRS", "W-2", "Schedule", "Adjusted Gross Income", "Taxable Income"]
+        if any(kw in content_text for kw in tax_keywords):
             return "B"
             
-        # Layer 3: Visual/Density Analysis (Placeholder for model-based)
-        # Simulation: High density (>80% text) -> Stream D
-        text_density = len(content_snippet.strip()) / 2000
+        # Layer 3: Visual/Density Analysis — text density check
+        text_density = len(content_text.strip()) / 3000
         if text_density > 0.8:
             return "D"
             
