@@ -180,6 +180,23 @@ Robust AI system deployment necessitates a structured governance framework that 
 
 * **Governance Implementation:** The model executes completely autonomously. For instance, Pillar 6 calculates the **Disparate Impact Ratio (DIR)** continuously across disparate input domains to ensure EEOC parity ($DIR \ge 0.80$), whereas Pillar 7 actively logs adversarial **Prompt Injections** to measure real-time *Safety & Security* per the India AI Sutras.
 
+### Chart Visualizations
+The governance pipeline generates automated compliance visualizations to track pipeline health instantly:
+
+![Data Catalog](frontend/public/assets/charts/catalog_coverage.png)
+
+![Data Classification](frontend/public/assets/charts/classification.png)
+
+![Data Quality](frontend/public/assets/charts/quality_radar.png)
+
+![Data Lineage](frontend/public/assets/charts/lineage.png)
+
+![Data Drift](frontend/public/assets/charts/drift.png)
+
+![Bias & Fairness](frontend/public/assets/charts/bias.png)
+
+![Security & Adversarial Robustness](frontend/public/assets/charts/security.png)
+
 ---
 
 ## 5. Visual Dashboard and Results
