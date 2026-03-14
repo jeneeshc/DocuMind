@@ -7,7 +7,7 @@ import {
     BrainCircuit,
     PanelLeft,
     Info,
-    Activity
+    ShieldCheck
 } from "lucide-react"
 
 interface SidebarProps {
@@ -26,9 +26,9 @@ export function Sidebar({ isCollapsed, onCollapse }: SidebarProps) {
             color: "text-blue-400",
         },
         {
-            label: "Evaluation Suite",
-            icon: Activity,
-            href: "/testing",
+            label: "Data Governance",
+            icon: ShieldCheck,
+            href: "/data-governance",
             color: "text-emerald-400",
         },
         {
