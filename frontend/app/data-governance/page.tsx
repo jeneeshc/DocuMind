@@ -9,7 +9,9 @@ import {
     ShieldCheck, BookOpen, Tag, CheckCircle2, GitBranch,
     TrendingUp, Scale, Activity, Loader2, AlertTriangle,
     AlertCircle, ChevronRight, Database, BarChart3, Cpu,
-    Coins, FileSearch, ShieldAlert, ShieldBan,
+    Coins, FileSearch, ShieldAlert, ShieldBan, Lightbulb,
+    Eye, Leaf, GraduationCap, Gavel, FolderKey,
+    UserX, MonitorCheck, ClipboardCheck
 } from "lucide-react"
 
 // Dynamically import all Recharts to avoid SSR hydration issues
@@ -33,6 +35,8 @@ const ComposedChart = dynamic(() => import("recharts").then(m => m.ComposedChart
 const Cell = dynamic(() => import("recharts").then(m => m.Cell), { ssr: false })
 const PieChart = dynamic(() => import("recharts").then(m => m.PieChart), { ssr: false })
 const Pie = dynamic(() => import("recharts").then(m => m.Pie), { ssr: false })
+const AreaChart = dynamic(() => import("recharts").then(m => m.AreaChart), { ssr: false })
+const Area = dynamic(() => import("recharts").then(m => m.Area), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface GovernanceMetrics {
@@ -43,6 +47,15 @@ interface GovernanceMetrics {
     drift: { windows: any[]; currentPSI: number; driftStatus: string; maxKL: number }
     bias: { groups: any[]; chiSquare: number; pValue: string; minDIR: number }
     security: { tests: any[]; overallRejectionRate: number; totalAttempts: number }
+    explainability: { data: any[]; avgStability: number }
+    humanOversight: { data: any[]; overallFlagRate: number; overallOverrideRate: number }
+    genAiSafety: { data: any[]; radar: any[] }
+    environment: { data: any[]; avgCarbonIntensity: number }
+    impactAssessments: { data: any[] }
+    dataSubjectRights: { data: any[] }
+    consequentialDecisions: { data: any[] }
+    interactionTransparency: { data: any[]; overallAffirmationRate: number }
+    aiLiteracy: { data: any[]; overallLiteracyRate: number }
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -619,6 +632,359 @@ export default function DataGovernancePage() {
                         </CardContent>
                     </Card>
                 )}
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 8: EXPLAINABILITY
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={Lightbulb} color="bg-yellow-500" number={8} title="Explainability" subtitle="Feature Attribution Stability — SHAP Values & EU AI Act (Art. 13)" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            SHAP values estimate the marginal contribution of individual features to the model's final output.
+                            High stability implies explanations are robust across local perturbations of the input document.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target Threshold: Stability &gt; 0.85</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">SHAP Metrics</h3>
+                        {gm ? (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <StatBadge label="Avg Stability" value={String(gm.explainability.avgStability)} ok={gm.explainability.avgStability > 0.85} />
+                                    <StatBadge label="Threshold" value="> 0.85" ok={true} />
+                                </div>
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+                {gm && (
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-slate-800">SHAP Stability by Model Component</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-72">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={gm.explainability.data} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="component" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} axisLine={false} />
+                                    <YAxis domain={[0, 1]} tick={{ fill: "#64748b" }} tickLine={false} axisLine={false} />
+                                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#fefce8" }} />
+                                    <ReferenceLine y={0.85} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: "Target (0.85)", position: "right", fill: "#f59e0b", fontSize: 10 }} />
+                                    <Bar dataKey="stability" name="Stability Score" radius={[4, 4, 0, 0]} barSize={50}>
+                                        {gm.explainability.data.map((g: any, i: number) => (
+                                            <Cell key={i} fill={g.stability > 0.85 ? "#eab308" : "#f43f5e"} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                )}
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 9: HUMAN OVERSIGHT
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={Eye} color="bg-sky-500" number={9} title="Human Oversight" subtitle="Human-in-the-Loop Override Rates — EU AI Act (Art. 14)" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Low-confidence extractions are routed to human reviewers. We track the Flag Rate (efficiency)
+                            and the Override Rate (proof that human review is actively catching anomalies, not just rubber-stamping).
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target: Flag Rate &lt; 15%</div>
+                            <div>Target: Override Rate &gt; 10%</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">Oversight Metrics</h3>
+                        {gm ? (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <StatBadge label="Overall Flag Rate" value={`${gm.humanOversight.overallFlagRate}%`} ok={gm.humanOversight.overallFlagRate < 15} />
+                                    <StatBadge label="Overall Override Rate" value={`${gm.humanOversight.overallOverrideRate}%`} ok={gm.humanOversight.overallOverrideRate > 10} />
+                                </div>
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+                {gm && (
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader><CardTitle className="text-slate-800">Review Flags vs Overrides per Domain</CardTitle></CardHeader>
+                        <CardContent className="h-72">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={gm.humanOversight.data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="domain" tick={{ fill: "#64748b", fontSize: 13 }} tickLine={false} axisLine={false} />
+                                    <YAxis tick={{ fill: "#64748b" }} tickLine={false} axisLine={false} />
+                                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f9ff" }} />
+                                    <Legend wrapperStyle={{ paddingTop: 16 }} />
+                                    <Bar dataKey="flagged" name="Total Flagged" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="overridden" name="Successfully Overridden" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                )}
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 10: GENAI SAFETY
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={ShieldAlert} color="bg-red-500" number={10} title="GenAI Safety" subtitle="Factual Consistency & Toxicity — EU GPAI Code of Practice" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Cross-encoder architectures verify that generated text is factually consistent with the source document.
+                            Any generation that hallucinated or contains toxicity is flagged.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target: Factual Score ≥ 0.95</div>
+                            <div>Target: Toxicity = 0.0</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">Safety Metrics</h3>
+                        {gm ? (
+                            <div className="space-y-2">
+                                {gm.genAiSafety.data.map((d: any, i: number) => (
+                                    <div key={i} className="flex justify-between items-center bg-slate-50 p-3 rounded border border-slate-100">
+                                        <span className="text-sm font-semibold">{d.metric}</span>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-mono">{d.score}</span>
+                                            <span className={`text-xs px-2 py-1 rounded ${d.status.includes('Pass') ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{d.status}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+                {gm && (
+                    <Card className="border-slate-200 shadow-sm w-full md:w-1/2 mx-auto">
+                        <CardHeader>
+                            <CardTitle className="text-slate-800">Safety Radar Chart</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-72">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RadarChart data={gm.genAiSafety.radar}>
+                                    <PolarGrid stroke="#e2e8f0" />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#64748b", fontSize: 11 }} />
+                                    <Radar name="Score" dataKey="A" stroke="#ef4444" fill="#ef4444" fillOpacity={0.4} />
+                                    <Tooltip contentStyle={tooltipStyle} />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                )}
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 11: ENVIRONMENTAL IMPACT
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={Leaf} color="bg-emerald-500" number={11} title="Environmental Impact" subtitle="Carbon Intensity per Inference — ITU-T L.1801" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Calculates the cumulative footprint multiplying GPU compute time by local grid carbon intensity.
+                            Supports workload routing to low-carbon data centres.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>C = Power × time × Grid_Intensity</div>
+                            <div>Target: &lt; 0.5 gCO₂ per doc</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">Emissions Metric</h3>
+                        {gm ? (
+                            <div className="space-y-3">
+                                <div className="text-center">
+                                    <div className={`text-5xl font-extrabold ${gm.environment.avgCarbonIntensity < 0.5 ? "text-emerald-600" : "text-rose-500"}`}>{gm.environment.avgCarbonIntensity}</div>
+                                    <div className="text-sm text-slate-500 mt-1">Avg gCO₂ per Extracted Document</div>
+                                    <div className="text-xs text-rose-500 mt-2">Driven up by US-East node usage.</div>
+                                </div>
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+                {gm && (
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-slate-800">Carbon Intensity by Compute Node</CardTitle>
+                        </CardHeader>
+                        <CardContent className="h-72">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={gm.environment.data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="cluster" tick={{ fill: "#64748b", fontSize: 13 }} tickLine={false} axisLine={false} />
+                                    <YAxis tick={{ fill: "#64748b" }} tickLine={false} axisLine={false} />
+                                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#ecfdf5" }} />
+                                    <ReferenceLine y={0.5} stroke="#10b981" strokeDasharray="5 5" label={{ value: "Target (<0.5)", position: "right", fill: "#10b981", fontSize: 10 }} />
+                                    <Bar dataKey="gCO2" name="gCO₂ per Doc" radius={[4, 4, 0, 0]} barSize={50}>
+                                        {gm.environment.data.map((g: any, i: number) => (
+                                            <Cell key={i} fill={g.gCO2 < 0.5 ? "#10b981" : "#ef4444"} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                )}
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 12: AI IMPACT ASSESSMENTS
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={ClipboardCheck} color="bg-teal-600" number={12} title="AI Impact Assessments" subtitle="DPIA / AIA Tracking — GDPR (Art. 35) & DPDP Act" />
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                    <p className="text-sm text-slate-600 mb-4">Tracking mandatory pre-deployment documentation for high-risk AI models. System deployments are locked if statutory assessments expire.</p>
+                    {gm ? (
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {gm.impactAssessments.data.map((assess: any, i: number) => (
+                                <div key={i} className="p-4 border border-slate-200 rounded-lg">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-bold text-slate-800">{assess.type}</h4>
+                                        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                    </div>
+                                    <div className="text-sm text-slate-500 mb-2">{assess.cleared}/{assess.req} Checkpoints Cleared</div>
+                                    <div className="text-xs bg-slate-100 p-2 rounded">Next Review: {assess.expiry}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                </div>
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 13: DATA SUBJECT RIGHTS
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={UserX} color="bg-pink-600" number={13} title="Data Subject Rights" subtitle="Machine Unlearning SLA Compliance — GDPR (Art. 17)" />
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                    <p className="text-sm text-slate-600 mb-4">Monitoring the "Right to Erasure" pipeline latency ensuring vector embeddings and ledger data to hit strict 30-day (720 hour) SLAs.</p>
+                    {gm ? (
+                        <div className="grid md:grid-cols-3 gap-4">
+                            {gm.dataSubjectRights.data.map((dsr: any, i: number) => (
+                                <div key={i} className="text-center p-4 border border-slate-100 bg-slate-50 rounded-lg">
+                                    <div className="text-xs text-slate-500 uppercase font-bold mb-1">{dsr.metric}</div>
+                                    <div className={`text-2xl font-bold ${dsr.value <= dsr.limit ? 'text-emerald-600' : 'text-rose-600'}`}>{dsr.value}</div>
+                                    <div className="text-xs text-slate-400 mt-1">Limit: {dsr.limit}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                </div>
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 14: CONSEQUENTIAL DECISIONS
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={Gavel} color="bg-orange-600" number={14} title="Consequential Decisions" subtitle="User Appeal Success Rate — Colorado AI Act & GDPR" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Tracks the post-deployment fairness of automated profiling decisions (e.g., denying an insurance claim). A high appeal overturn rate indicates an overly stringent or biased extraction threshold.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target: UAS Rate &lt; 20%</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                         <h3 className="font-semibold text-slate-800 mb-3">Appeal Status</h3>
+                        {gm ? (
+                            <div className="space-y-2">
+                                <p className="text-sm text-slate-600 mb-4">Insurance Claims module triggered a Governance Hold due to &gt;20% overturn rate.</p>
+                                <div className="space-y-2 mt-2">
+                                    {gm.consequentialDecisions.data.map((c: any, i: number) => (
+                                        <div key={i} className="flex justify-between items-center text-sm">
+                                            <span className="w-32">{c.sector}</span>
+                                            <div className="flex-1 bg-slate-100 rounded h-2.5 mx-2">
+                                                <div className={`h-2.5 rounded ${c.rate < 20 ? 'bg-emerald-400' : 'bg-rose-500'}`} style={{ width: `${c.rate * 2}%` }} />
+                                            </div>
+                                            <span className="w-12 text-right font-mono">{c.rate}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 15: INTERACTION TRANSPARENCY
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6">
+                <SectionHeader icon={MonitorCheck} color="bg-indigo-500" number={15} title="Interaction Transparency" subtitle="Bot Disclosure Affirmation — Utah AI Policy Act" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Checks if human users are explicitly acknowledging a "Bot/AI Disclaimer" banner before using the interactive Document Q&A tools, preventing deceptive UX.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target: &gt; 95% Affirmation Rate</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">Affirmation Rate</h3>
+                        {gm ? (
+                            <div className="text-center">
+                                <div className="text-5xl font-extrabold text-indigo-600">{gm.interactionTransparency.overallAffirmationRate}%</div>
+                                <div className="text-sm text-slate-500 mt-2">Across Web and Mobile Integrations</div>
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
+            </section>
+
+            {/* ════════════════════════════════════════════════════════════════
+                PILLAR 16: AI LITERACY
+            ═══════════════════════════════════════════════════════════════════ */}
+            <section className="space-y-6 mb-12">
+                <SectionHeader icon={GraduationCap} color="bg-fuchsia-600" number={16} title="AI Literacy" subtitle="Staff Training Certification — EU AI Act (Art. 4)" />
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-1">Methodology</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                            Verifies that all internal staff operating the system have completed mandatory AI ethics and security certifications.
+                        </p>
+                        <div className="mt-3 space-y-1 text-xs font-mono bg-slate-50 p-3 rounded border border-slate-100">
+                            <div>Target: 100% Core Staff Compliance</div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h3 className="font-semibold text-slate-800 mb-3">Literacy Rates</h3>
+                         {gm ? (
+                            <div className="space-y-4">
+                                {gm.aiLiteracy.data.map((c: any, i: number) => (
+                                    <div key={i} className="flex justify-between items-center text-sm">
+                                        <span className="w-32">{c.dept}</span>
+                                        <div className="flex-1 bg-slate-100 rounded h-4 mx-2 border border-slate-200 relative overflow-hidden">
+                                            <div className={`h-full ${c.rate === 100 ? 'bg-fuchsia-500' : 'bg-amber-400'}`} style={{ width: `${c.rate}%` }} />
+                                        </div>
+                                        <span className="w-12 text-right font-mono">{c.rate}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+                    </div>
+                </div>
             </section>
 
             {/* ════════════════════════════════════════════════════════════════

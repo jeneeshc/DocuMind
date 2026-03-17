@@ -102,6 +102,90 @@ function computeGovernanceMetrics() {
     const totalRejected = securityTests.reduce((acc, sum) => acc + sum.rejected, 0)
     const overallRejectionRate = Number(((totalRejected / totalAttempts) * 100).toFixed(1))
 
+    // --- 8. Explainability ---
+    const explainabilityData = [
+        { component: 'Semantic Router', stability: 0.92, topFeature: 'Page Layout Density', status: '✓ Compliant' },
+        { component: 'Tax Extractor', stability: 0.94, topFeature: 'Vendor Entity NLP', status: '✓ Compliant' },
+        { component: 'Invoice Extractor', stability: 0.89, topFeature: 'Table Bounding Box', status: '✓ Compliant' },
+        { component: 'Legal Clause', stability: 0.84, topFeature: 'Header Keyword', status: '⚠ Monitor' },
+    ]
+    const avgStability = Number((explainabilityData.reduce((acc, curr) => acc + curr.stability, 0) / explainabilityData.length).toFixed(2))
+
+    // --- 9. Human Oversight ---
+    const oversightData = [
+        { domain: 'Invoices', processed: 50000, flagged: 5000, flagRate: 10.0, overridden: 600, overrideRate: 12.0 },
+        { domain: 'Tax Forms', processed: 20000, flagged: 2800, flagRate: 14.0, overridden: 420, overrideRate: 15.0 },
+        { domain: 'Legal', processed: 10000, flagged: 1800, flagRate: 18.0, overridden: 360, overrideRate: 20.0 },
+    ]
+    const totalProcessed = oversightData.reduce((acc, curr) => acc + curr.processed, 0)
+    const totalFlagged = oversightData.reduce((acc, curr) => acc + curr.flagged, 0)
+    const totalOverridden = oversightData.reduce((acc, curr) => acc + curr.overridden, 0)
+    const overallFlagRate = Number(((totalFlagged / totalProcessed) * 100).toFixed(1))
+    const overallOverrideRate = Number(((totalOverridden / totalFlagged) * 100).toFixed(1))
+
+    // --- 10. GenAI Safety ---
+    const genAiSafetyData = [
+        { metric: 'Factual Consistency', score: 0.98, target: '≥ 0.95', status: '✓ Pass' },
+        { metric: 'Toxicity Incident Rate', score: 0.00, target: '0.00%', status: '✓ Pass' },
+        { metric: 'Hallucination', score: 0.004, target: '≤ 1.0%', status: '✓ Pass' },
+    ]
+    const safetyRadar = [
+        { subject: 'Consistency', A: 98, fullMark: 100 },
+        { subject: 'Safety', A: 100, fullMark: 100 },
+        { subject: 'Helpfulness', A: 96, fullMark: 100 },
+        { subject: 'Toxicity (Inv)', A: 100, fullMark: 100 },
+        { subject: 'Hallucination (Inv)', A: 99.6, fullMark: 100 },
+    ]
+
+    // --- 11. Environmental Impact ---
+    const environmentData = [
+        { cluster: 'US-East', hours: 120, power: 2.4, gridIntensity: 380, gCO2: 1.10 },
+        { cluster: 'EU-North', hours: 120, power: 2.4, gridIntensity: 15, gCO2: 0.04 },
+        { cluster: 'IN-West', hours: 60, power: 2.4, gridIntensity: 650, gCO2: 1.88 },
+    ]
+    const avgCarbonIntensity = Number((environmentData.reduce((acc, curr) => acc + curr.gCO2, 0) / environmentData.length).toFixed(2))
+
+    // --- 12. AI Impact Assessments ---
+    const assessmentsData = [
+        { type: 'Core DPIA', req: 14, cleared: 14, expiry: '2026-11-01', status: '✓ Valid' },
+        { type: 'Algorithmic AIA', req: 8, cleared: 8, expiry: '2026-08-15', status: '✓ Valid' },
+        { type: 'Security Audit', req: 10, cleared: 10, expiry: '2027-01-10', status: '✓ Valid' },
+    ]
+
+    // --- 13. Data Subject Rights ---
+    const subjectRightsData = [
+        { metric: 'Mean Time to Unlearn', value: 48.5, limit: 720, status: '✓ Pass' },
+        { metric: '99th Percentile Res', value: 142.1, limit: 720, status: '✓ Pass' },
+        { metric: 'Verification Failure', value: 0, limit: 0, status: '✓ Pass' },
+    ]
+
+    // --- 14. Consequential Decisions ---
+    const consequentialData = [
+        { sector: 'Mortgage Audits', decisions: 12000, appeals: 450, won: 72, rate: 16.0 },
+        { sector: 'Insurance Claims', decisions: 35000, appeals: 2100, won: 483, rate: 23.0 },
+        { sector: 'Background Checks', decisions: 8000, appeals: 150, won: 12, rate: 8.0 },
+    ]
+
+    // --- 15. Interaction Transparency ---
+    const transparencyData = [
+        { interface: 'Web Portal (B2B)', sessions: 45000, ack: 44550, rate: 99.0 },
+        { interface: 'Mobile App (B2C)', sessions: 120500, ack: 114475, rate: 95.0 },
+        // Excluding API Headless from calculations
+    ]
+    const totalAckSessions = transparencyData.reduce((acc, curr) => acc + curr.sessions, 0)
+    const totalAcked = transparencyData.reduce((acc, curr) => acc + curr.ack, 0)
+    const overallAffirmationRate = Number(((totalAcked / totalAckSessions) * 100).toFixed(1))
+
+    // --- 16. AI Literacy ---
+    const literacyData = [
+        { dept: 'MLOps Eng', staff: 45, certified: 45, rate: 100 },
+        { dept: 'Data Annotation', staff: 120, certified: 120, rate: 100 },
+        { dept: 'Compliance & Legal', staff: 12, certified: 11, rate: 91 },
+    ]
+    const totalStaff = literacyData.reduce((acc, curr) => acc + curr.staff, 0)
+    const totalCertified = literacyData.reduce((acc, curr) => acc + curr.certified, 0)
+    const overallLiteracyRate = Number(((totalCertified / totalStaff) * 100).toFixed(1))
+
     return {
         catalog: { assets: catalogScore, overallScore: 82.4 },
         classification: {
@@ -140,6 +224,40 @@ function computeGovernanceMetrics() {
             tests: securityTests,
             overallRejectionRate,
             totalAttempts,
+        },
+        explainability: {
+            data: explainabilityData,
+            avgStability,
+        },
+        humanOversight: {
+            data: oversightData,
+            overallFlagRate,
+            overallOverrideRate,
+        },
+        genAiSafety: {
+            data: genAiSafetyData,
+            radar: safetyRadar,
+        },
+        environment: {
+            data: environmentData,
+            avgCarbonIntensity,
+        },
+        impactAssessments: {
+            data: assessmentsData,
+        },
+        dataSubjectRights: {
+            data: subjectRightsData,
+        },
+        consequentialDecisions: {
+            data: consequentialData,
+        },
+        interactionTransparency: {
+            data: transparencyData,
+            overallAffirmationRate,
+        },
+        aiLiteracy: {
+            data: literacyData,
+            overallLiteracyRate,
         },
     }
 }
